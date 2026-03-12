@@ -1,7 +1,7 @@
 /** 拓扑节点/边类型定义 */
 import type { Node, Edge } from '@xyflow/react';
 import type {
-  SourceData, LoadData, FanData, CPUData, SensorData,
+  SourceData, FanData, CPUData, SensorData,
   MemoryData, DiskData, IOData, CardData, MgmtBoardData,
 } from './power';
 
@@ -16,6 +16,7 @@ export type HardwareNodeData = {
   label: string;
   nodeType: HardwareNodeType;
   category: 'source' | 'path' | 'load' | 'other';
+  customIcon?: string;
 } & (
   | { nodeType: 'ac'; sourceData: SourceData }
   | { nodeType: 'psu'; sourceData: SourceData }
