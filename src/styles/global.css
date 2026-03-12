@@ -1,0 +1,153 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* React Flow 节点通用样式 */
+.hardware-node {
+  background: #fff;
+  border: 2px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 140px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.hardware-node:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.hardware-node.selected {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+.hardware-node .node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #262626;
+}
+
+.hardware-node .node-header .node-icon {
+  font-size: 18px;
+}
+
+.hardware-node .node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hardware-node .node-body .data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #595959;
+}
+
+.hardware-node .data-row .data-label {
+  color: #8c8c8c;
+}
+
+.hardware-node .data-row .data-value {
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+}
+
+.hardware-node .node-footer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 源节点 */
+.hardware-node.source-node {
+  border-color: #91caff;
+  background: linear-gradient(135deg, #e6f4ff 0%, #fff 100%);
+}
+
+/* 负载节点 */
+.hardware-node.load-node {
+  border-color: #b7eb8f;
+  background: linear-gradient(135deg, #f6ffed 0%, #fff 100%);
+}
+
+/* 风扇节点 */
+.hardware-node.fan-node {
+  border-color: #87e8de;
+  background: linear-gradient(135deg, #e6fffb 0%, #fff 100%);
+}
+
+/* CPU节点 */
+.hardware-node.cpu-node {
+  border-color: #d3adf7;
+  background: linear-gradient(135deg, #f9f0ff 0%, #fff 100%);
+  min-width: 160px;
+}
+
+/* 传感器节点 */
+.hardware-node.sensor-node {
+  border-color: #ffd591;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff 100%);
+  min-width: 120px;
+}
+
+/* 管理板节点 */
+.hardware-node.mgmt-node {
+  border-color: #adc6ff;
+  background: linear-gradient(135deg, #f0f5ff 0%, #fff 100%);
+}
+
+/* 效率进度条 */
+.efficiency-bar {
+  width: 100%;
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.efficiency-bar .efficiency-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* 工具栏 */
+.topology-toolbar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  padding: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Power Edge标签 */
+.power-edge-label {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  white-space: nowrap;
+}
