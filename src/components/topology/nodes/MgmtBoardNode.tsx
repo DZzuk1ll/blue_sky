@@ -10,12 +10,12 @@ import {
 const MgmtBoardNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
-    mgmtBoardData: {
+    mgmtData?: {
       status: 'online' | 'offline';
       temperature: number;
     };
   };
-  const mgmt = data.mgmtBoardData;
+  const mgmt = data.mgmtData ?? { status: 'online' as const, temperature: 0 };
 
   return (
     <div className="hardware-node mgmt-node">
