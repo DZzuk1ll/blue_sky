@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   type OnSelectionChangeParams,
+  type NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -37,19 +38,43 @@ const TopologyCanvas: React.FC = () => {
   const [cpuModalNodeId, setCpuModalNodeId] = useState<string | null>(null);
   const [cpuModalData, setCpuModalData] = useState<CPUData | null>(null);
 
+  // Track drag state to prevent detail panel opening during drag
+  const isDragging = useRef(false);
+  const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+
   const handleSelectionChange = useCallback(
     (params: OnSelectionChangeParams) => {
       const ids = params.nodes.map((n) => n.id);
       setSelectedNodeIds(ids);
-      if (ids.length === 1) {
-        const node = nodes.find((n) => n.id === ids[0]) ?? null;
-        setSelectedNode(node);
-      } else {
-        setSelectedNode(null);
-      }
     },
-    [nodes, setSelectedNodeIds],
+    [setSelectedNodeIds],
   );
+
+  // Only open detail panel on deliberate click (not drag)
+  const handleNodeClick: NodeMouseHandler<TopologyNode> = useCallback(
+    (_event, node) => {
+      // Don't open panel if this was a drag
+      if (isDragging.current) {
+        isDragging.current = false;
+        return;
+      }
+      setSelectedNode(node);
+    },
+    [],
+  );
+
+  const handleNodeDragStart = useCallback(() => {
+    isDragging.current = false;
+    mouseDownPos.current = null;
+  }, []);
+
+  const handleNodeDrag = useCallback(() => {
+    isDragging.current = true;
+  }, []);
+
+  const handlePaneClick = useCallback(() => {
+    setSelectedNode(null);
+  }, []);
 
   // Listen for CPU detail custom event
   useEffect(() => {
@@ -93,6 +118,10 @@ const TopologyCanvas: React.FC = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onSelectionChange={handleSelectionChange}
+        onNodeClick={handleNodeClick}
+        onNodeDragStart={handleNodeDragStart}
+        onNodeDrag={handleNodeDrag}
+        onPaneClick={handlePaneClick}
         fitView
       >
         <Background />
