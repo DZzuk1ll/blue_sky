@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Table, Form, Input, InputNumber, Button, Space, Popconfirm, message } from 'antd';
+import { Card, Table, Form, Input, InputNumber, Button, Popconfirm, message } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
 import type { ColumnsType } from 'antd/es/table';

@@ -6,6 +6,7 @@ import TopologyCanvas from './components/topology/TopologyCanvas';
 import PowerEfficiency from './components/panels/PowerEfficiency';
 import TestSuitePanel from './components/reserved/TestSuitePanel';
 import OptimizationPanel from './components/reserved/OptimizationPanel';
+import DesignCanvas from './components/design/DesignCanvas';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<TopologyCanvas />} />
+            <Route path="/design" element={<DesignCanvas />} />
             <Route path="/efficiency" element={<PowerEfficiency />} />
             <Route path="/test" element={<TestSuitePanel />} />
             <Route path="/optimize" element={<OptimizationPanel />} />

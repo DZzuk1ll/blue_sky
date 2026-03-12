@@ -5,6 +5,7 @@ import {
   ThunderboltOutlined,
   ExperimentOutlined,
   AimOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useMonitorStore } from '../../stores/monitorStore';
@@ -13,6 +14,7 @@ const { Header, Sider, Content } = Layout;
 
 const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '拓扑监控' },
+  { key: '/design', icon: <EditOutlined />, label: '拓扑设计' },
   { key: '/efficiency', icon: <ThunderboltOutlined />, label: '效率分析' },
   { key: '/test', icon: <ExperimentOutlined />, label: '用例测试' },
   { key: '/optimize', icon: <AimOutlined />, label: '自动寻优' },

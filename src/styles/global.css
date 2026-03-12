@@ -31,13 +31,70 @@ html, body, #root {
   box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.2);
 }
 
+/* 节点内容区域：左图标 + 右信息 */
+.hardware-node .node-content {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hardware-node .node-icon-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 24px;
+  color: #595959;
+  flex-shrink: 0;
+}
+
+.hardware-node.source-node .node-icon-area {
+  background: rgba(22, 119, 255, 0.08);
+  color: #1677ff;
+}
+
+.hardware-node.load-node .node-icon-area {
+  background: rgba(82, 196, 26, 0.08);
+  color: #52c41a;
+}
+
+.hardware-node.fan-node .node-icon-area {
+  background: rgba(19, 194, 194, 0.08);
+  color: #13c2c2;
+}
+
+.hardware-node.cpu-node .node-icon-area {
+  background: rgba(114, 46, 209, 0.08);
+  color: #722ed1;
+}
+
+.hardware-node.sensor-node .node-icon-area {
+  background: rgba(250, 173, 20, 0.08);
+  color: #faad14;
+}
+
+.hardware-node.mgmt-node .node-icon-area {
+  background: rgba(47, 84, 235, 0.08);
+  color: #2f54eb;
+}
+
+.hardware-node .node-info {
+  flex: 1;
+  min-width: 0;
+}
+
 .hardware-node .node-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 4px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   color: #262626;
 }
 
@@ -48,7 +105,8 @@ html, body, #root {
 .hardware-node .node-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  font-size: 13px;
 }
 
 .hardware-node .node-body .data-row {
@@ -150,4 +208,98 @@ html, body, #root {
   border-radius: 4px;
   border: 1px solid #d9d9d9;
   white-space: nowrap;
+}
+
+/* 设计模式 - 模块面板 */
+.module-palette {
+  width: 220px;
+  height: 100%;
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.module-palette .palette-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.module-palette .palette-category {
+  margin-bottom: 12px;
+}
+
+.module-palette .category-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.module-palette .palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  cursor: grab;
+  transition: all 0.2s;
+  font-size: 13px;
+  color: #595959;
+}
+
+.module-palette .palette-item:hover {
+  border-color: #1677ff;
+  background: #e6f4ff;
+  color: #1677ff;
+}
+
+.module-palette .palette-item:active {
+  cursor: grabbing;
+}
+
+.module-palette .palette-item .palette-icon {
+  font-size: 18px;
+}
+
+/* 图标选择器 */
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.icon-picker-grid .icon-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #595959;
+  transition: all 0.2s;
+}
+
+.icon-picker-grid .icon-picker-item:hover {
+  border-color: #1677ff;
+  color: #1677ff;
+  background: #e6f4ff;
+}
+
+.icon-picker-grid .icon-picker-item.selected {
+  border-color: #1677ff;
+  color: #1677ff;
+  background: #e6f4ff;
 }

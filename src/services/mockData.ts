@@ -2,9 +2,9 @@
 import type {
   SourceData, FanData, CPUData, CPUPowerDomain,
   AMUEvent, SensorData, MemoryData, DiskData, IOData,
-  CardData, MgmtBoardData, LoadData,
+  CardData, MgmtBoardData,
 } from '../types/power';
-import type { TopologyNode, TopologyEdge, PowerEdgeData } from '../types/topology';
+import type { TopologyNode, TopologyEdge, PowerEdgeData, HardwareNodeData } from '../types/topology';
 
 /** 在基准值附近生成随机波动 */
 function fluctuate(base: number, percent: number = 5): number {
@@ -140,6 +140,60 @@ export function mockMgmtBoardData(): MgmtBoardData {
     status: 'online',
     temperature: fluctuate(38, 5),
   };
+}
+
+/** 模块类型中文名称映射 */
+export const nodeTypeLabels: Record<string, string> = {
+  ac: 'AC电源',
+  psu: 'PSU',
+  vr: 'VR',
+  psip: 'PSIP',
+  cpu: 'CPU',
+  memory: '内存',
+  fan: '风扇',
+  disk: '硬盘',
+  io: 'IO',
+  card: '标卡',
+  sensor: '传感器',
+  mgmtBoard: '管理板',
+  chassis: '机框',
+};
+
+/** 根据模块类型创建默认节点数据（用于设计模式添加新模块） */
+export function createDefaultNodeData(type: string): HardwareNodeData {
+  const label = nodeTypeLabels[type] ?? type;
+  const category = (['ac', 'psu', 'vr', 'psip'].includes(type) ? 'source' : ['cpu', 'memory', 'fan', 'disk', 'io', 'card'].includes(type) ? 'load' : 'other') as 'source' | 'path' | 'load' | 'other';
+
+  switch (type) {
+    case 'ac':
+      return { label, nodeType: 'ac' as const, category, sourceData: mockSourceData({ inputVoltage: 220, outputVoltage: 220, efficiency: 99 }) };
+    case 'psu':
+      return { label, nodeType: 'psu' as const, category, sourceData: mockSourceData({ inputVoltage: 220, outputVoltage: 12, efficiency: 94 }) };
+    case 'vr':
+      return { label, nodeType: 'vr' as const, category, sourceData: mockSourceData({ inputVoltage: 12, outputVoltage: 0.85, current: 100, efficiency: 90 }) };
+    case 'psip':
+      return { label, nodeType: 'psip' as const, category, sourceData: mockSourceData({ inputVoltage: 12, outputVoltage: 1.8, current: 5, efficiency: 91 }) };
+    case 'cpu':
+      return { label, nodeType: 'cpu' as const, category, cpuData: mockCPUData() };
+    case 'memory':
+      return { label, nodeType: 'memory' as const, category, memoryData: mockMemoryData() };
+    case 'fan':
+      return { label, nodeType: 'fan' as const, category, fanData: mockFanData() };
+    case 'disk':
+      return { label, nodeType: 'disk' as const, category, diskData: mockDiskData() };
+    case 'io':
+      return { label, nodeType: 'io' as const, category, ioData: mockIOData() };
+    case 'card':
+      return { label, nodeType: 'card' as const, category, cardData: mockCardData('Slot-New') };
+    case 'sensor':
+      return { label, nodeType: 'sensor' as const, category, sensorData: mockSensorData('新传感器', 40) };
+    case 'mgmtBoard':
+      return { label, nodeType: 'mgmtBoard' as const, category, mgmtData: mockMgmtBoardData() };
+    case 'chassis':
+      return { label, nodeType: 'chassis' as const, category };
+    default:
+      return { label, nodeType: 'chassis' as const, category };
+  }
 }
 
 /** 默认拓扑节点 */

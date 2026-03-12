@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { HddOutlined } from '@ant-design/icons';
+import NodeIcon from './NodeIcon';
 import { Badge } from 'antd';
 import {
   formatPower,
@@ -17,6 +17,7 @@ const statusMap: Record<string, { status: 'success' | 'warning' | 'error'; text:
 const DiskNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
+    customIcon?: string;
     diskData: {
       power: number;
       temperature?: number;
@@ -29,22 +30,28 @@ const DiskNode: React.FC<NodeProps> = (props) => {
   return (
     <div className="hardware-node load-node">
       <Handle type="target" position={Position.Left} />
-      <div className="node-header">
-        <HddOutlined />
-        <span>{data.label ?? 'Disk'}</span>
-      </div>
-      <div className="node-body">
-        <div>功率: {formatPower(disk.power)}</div>
-        {disk.temperature !== undefined && (
-          <div>
-            温度:{' '}
-            <span style={{ color: getTemperatureColor(disk.temperature) }}>
-              {formatTemperature(disk.temperature)}
-            </span>
+      <div className="node-content">
+        <div className="node-icon-area">
+          <NodeIcon nodeType="disk" customIcon={data.customIcon} />
+        </div>
+        <div className="node-info">
+          <div className="node-header">
+            <span>{data.label ?? 'Disk'}</span>
           </div>
-        )}
-        <div>
-          状态: <Badge status={st.status} text={st.text} />
+          <div className="node-body">
+            <div>功率: {formatPower(disk.power)}</div>
+            {disk.temperature !== undefined && (
+              <div>
+                温度:{' '}
+                <span style={{ color: getTemperatureColor(disk.temperature) }}>
+                  {formatTemperature(disk.temperature)}
+                </span>
+              </div>
+            )}
+            <div>
+              状态: <Badge status={st.status} text={st.text} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

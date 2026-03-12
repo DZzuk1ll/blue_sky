@@ -5,9 +5,10 @@ import {
   applyEdgeChanges,
   type NodeChange,
   type EdgeChange,
+  type Connection,
 } from '@xyflow/react';
-import type { TopologyNode, TopologyEdge } from '../types/topology';
-import { getDefaultNodes, getDefaultEdges } from '../services/mockData';
+import type { TopologyNode, TopologyEdge, HardwareNodeType } from '../types/topology';
+import { getDefaultNodes, getDefaultEdges, createDefaultNodeData } from '../services/mockData';
 
 interface ClipboardItem {
   node: TopologyNode;
@@ -35,9 +36,18 @@ interface TopologyState {
   pasteNodes: () => void;
   deleteSelectedNodes: () => void;
 
+  // 设计模式操作
+  addNode: (type: HardwareNodeType, position: { x: number; y: number }) => void;
+  addEdge: (connection: Connection) => void;
+  removeNode: (id: string) => void;
+  removeEdge: (id: string) => void;
+  updateNodeIcon: (nodeId: string, iconName: string) => void;
+
   // 重置
   resetToDefault: () => void;
 }
+
+let nodeCounter = 0;
 
 export const useTopologyStore = create<TopologyState>((set, get) => ({
   nodes: getDefaultNodes(),
@@ -90,6 +100,57 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
         !selectedNodeIds.includes(e.source) && !selectedNodeIds.includes(e.target)
       ),
       selectedNodeIds: [],
+    });
+  },
+
+  addNode: (type, position) => {
+    const { nodes } = get();
+    nodeCounter++;
+    const id = `${type}-new-${Date.now()}-${nodeCounter}`;
+    const data = createDefaultNodeData(type);
+    const newNode: TopologyNode = {
+      id,
+      type,
+      position,
+      data,
+    };
+    set({ nodes: [...nodes, newNode] });
+  },
+
+  addEdge: (connection) => {
+    const { edges } = get();
+    const id = `e-${connection.source}-${connection.target}-${Date.now()}`;
+    const newEdge: TopologyEdge = {
+      id,
+      source: connection.source!,
+      target: connection.target!,
+      type: 'powerEdge',
+      data: { loss: 0, lossPercent: 0, animated: true },
+    };
+    set({ edges: [...edges, newEdge] });
+  },
+
+  removeNode: (id) => {
+    const { nodes, edges } = get();
+    set({
+      nodes: nodes.filter(n => n.id !== id),
+      edges: edges.filter(e => e.source !== id && e.target !== id),
+    });
+  },
+
+  removeEdge: (id) => {
+    const { edges } = get();
+    set({ edges: edges.filter(e => e.id !== id) });
+  },
+
+  updateNodeIcon: (nodeId, iconName) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, customIcon: iconName } }
+          : n
+      ),
     });
   },
 
