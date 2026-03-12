@@ -14,10 +14,10 @@ html, body, #root {
 .hardware-node {
   background: #fff;
   border: 2px solid #d9d9d9;
-  border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 140px;
-  font-size: 12px;
+  border-radius: 10px;
+  padding: 14px 18px;
+  min-width: 200px;
+  font-size: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
@@ -28,34 +28,34 @@ html, body, #root {
 
 .hardware-node.selected {
   border-color: #1677ff;
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.2);
 }
 
 .hardware-node .node-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 10px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 16px;
   color: #262626;
 }
 
 .hardware-node .node-header .node-icon {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .hardware-node .node-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .hardware-node .node-body .data-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: 13px;
   color: #595959;
 }
 
@@ -69,8 +69,8 @@ html, body, #root {
 }
 
 .hardware-node .node-footer {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid #f0f0f0;
 }
 
@@ -96,14 +96,14 @@ html, body, #root {
 .hardware-node.cpu-node {
   border-color: #d3adf7;
   background: linear-gradient(135deg, #f9f0ff 0%, #fff 100%);
-  min-width: 160px;
+  min-width: 220px;
 }
 
 /* 传感器节点 */
 .hardware-node.sensor-node {
   border-color: #ffd591;
   background: linear-gradient(135deg, #fff7e6 0%, #fff 100%);
-  min-width: 120px;
+  min-width: 180px;
 }
 
 /* 管理板节点 */
@@ -135,18 +135,18 @@ html, body, #root {
   left: 10px;
   z-index: 10;
   display: flex;
-  gap: 4px;
+  gap: 6px;
   background: #fff;
-  padding: 4px;
+  padding: 6px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Power Edge标签 */
 .power-edge-label {
-  font-size: 10px;
+  font-size: 12px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   border: 1px solid #d9d9d9;
   white-space: nowrap;
