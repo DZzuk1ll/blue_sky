@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
-  Background,
   Controls,
   MiniMap,
   type OnSelectionChangeParams,
@@ -14,6 +13,7 @@ import PowerEdge from './edges/PowerEdge';
 import Toolbar from './Toolbar';
 import NodeDetailPanel from '../panels/NodeDetailPanel';
 import CPUPowerDomain from '../panels/CPUPowerDomain';
+import TopologyOverviewPanel from '../panels/TopologyOverviewPanel';
 import { useTopologyStore } from '../../stores/topologyStore';
 import type { TopologyNode } from '../../types/topology';
 import type { CPUData } from '../../types/power';
@@ -37,6 +37,7 @@ const TopologyCanvas: React.FC = () => {
   const [cpuModalOpen, setCpuModalOpen] = useState(false);
   const [cpuModalNodeId, setCpuModalNodeId] = useState<string | null>(null);
   const [cpuModalData, setCpuModalData] = useState<CPUData | null>(null);
+  const [overviewOpen, setOverviewOpen] = useState(false);
 
   // Track drag state to prevent detail panel opening during drag
   const isDragging = useRef(false);
@@ -109,7 +110,7 @@ const TopologyCanvas: React.FC = () => {
   }, [copySelectedNodes, pasteNodes, deleteSelectedNodes]);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative', background: '#fff' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -124,7 +125,6 @@ const TopologyCanvas: React.FC = () => {
         onPaneClick={handlePaneClick}
         fitView
       >
-        <Background />
         <Controls />
         <MiniMap />
         <Toolbar
@@ -146,6 +146,11 @@ const TopologyCanvas: React.FC = () => {
         onClose={() => setCpuModalOpen(false)}
         nodeId={cpuModalNodeId}
         cpuData={cpuModalData}
+      />
+
+      <TopologyOverviewPanel
+        open={overviewOpen}
+        onToggle={() => setOverviewOpen((v) => !v)}
       />
     </div>
   );
