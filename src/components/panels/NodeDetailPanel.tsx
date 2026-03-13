@@ -9,6 +9,7 @@ import {
   formatTemperature,
   formatRPM,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../utils/formatters';
 import type { SourceData, FanData, LoadData, MemoryData, DiskData, IOData, CardData, SensorData } from '../../types/power';
 
@@ -192,7 +193,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
 
   return (
     <Drawer
-      title={node?.data?.label ?? '节点详情'}
+      title={node?.data ? getNodeDisplayLabel(node.data) || '节点详情' : '节点详情'}
       placement="right"
       width={360}
       open={open}

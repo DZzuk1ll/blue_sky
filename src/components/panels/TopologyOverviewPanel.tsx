@@ -10,7 +10,7 @@ import {
 import ReactECharts from 'echarts-for-react';
 import { useTopologyStore } from '../../stores/topologyStore';
 import type { TopologyNode, TopologyEdge } from '../../types/topology';
-import { formatPower } from '../../utils/formatters';
+import { formatPower, getNodeDisplayLabel } from '../../utils/formatters';
 
 interface HistoryPoint {
   time: string;
@@ -85,12 +85,14 @@ function computePowerSummary(nodes: TopologyNode[], edges: TopologyEdge[]) {
 
   // Power loss rankings from edges
   const edgeLosses = edges
-    .filter(e => e.data?.loss)
+    .filter(e => e.data?.loss !== undefined)
     .map(e => {
       const srcNode = nodes.find(n => n.id === e.source);
       const tgtNode = nodes.find(n => n.id === e.target);
+      const srcLabel = srcNode?.data ? (getNodeDisplayLabel(srcNode.data as any) || srcNode.data.label || e.source) : e.source;
+      const tgtLabel = tgtNode?.data ? (getNodeDisplayLabel(tgtNode.data as any) || tgtNode.data.label || e.target) : e.target;
       return {
-        path: `${srcNode?.data.label ?? e.source} → ${tgtNode?.data.label ?? e.target}`,
+        path: `${srcLabel} → ${tgtLabel}`,
         loss: e.data!.loss,
         lossPercent: e.data!.lossPercent,
       };

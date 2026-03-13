@@ -312,12 +312,15 @@ export function refreshNodeData(nodes: TopologyNode[]): TopologyNode[] {
 export function refreshEdgeData(edges: TopologyEdge[]): TopologyEdge[] {
   return edges.map(edge => {
     const prev = edge.data!;
+    // 新建边 loss=0 时给一个随机小损耗，避免永远为0
+    const baseLoss = prev.loss === 0 ? +(Math.random() * 2 + 0.5).toFixed(2) : prev.loss;
+    const baseLossPercent = prev.lossPercent === 0 ? +(Math.random() * 0.5 + 0.1).toFixed(2) : prev.lossPercent;
     return {
       ...edge,
       data: {
         ...prev,
-        loss: fluctuate(prev.loss, 5),
-        lossPercent: fluctuate(prev.lossPercent, 5),
+        loss: fluctuate(baseLoss, 5),
+        lossPercent: fluctuate(baseLossPercent, 5),
       } as PowerEdgeData,
     };
   });

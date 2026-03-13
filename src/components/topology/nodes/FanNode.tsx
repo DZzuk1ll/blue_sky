@@ -41,7 +41,7 @@ const FanNode: React.FC<NodeProps> = (props) => {
             <div>功率: {formatPower(fan.power)}</div>
             <div>转速: {formatRPM(fan.rpm)}</div>
             <div>速度: {fan.speedPercent}%</div>
-            <div>
+            <div className="nodrag nopan">
               <span>速度控制:</span>
               <Slider
                 min={0}
