@@ -19,14 +19,22 @@ const InteractiveZone: React.FC<{ children: React.ReactNode; className?: string 
       e.stopPropagation();
     };
 
-    el.addEventListener('pointerdown', stop, true);
-    el.addEventListener('mousedown', stop, true);
-    el.addEventListener('touchstart', stop, true);
+    // 使用冒泡阶段（而非捕获阶段）拦截事件，
+    // 这样事件仍能到达子组件（如 Slider），但不会冒泡到 React Flow
+    el.addEventListener('pointerdown', stop, false);
+    el.addEventListener('mousedown', stop, false);
+    el.addEventListener('touchstart', stop, false);
+    el.addEventListener('pointermove', stop, false);
+    el.addEventListener('mousemove', stop, false);
+    el.addEventListener('touchmove', stop, false);
 
     return () => {
-      el.removeEventListener('pointerdown', stop, true);
-      el.removeEventListener('mousedown', stop, true);
-      el.removeEventListener('touchstart', stop, true);
+      el.removeEventListener('pointerdown', stop, false);
+      el.removeEventListener('mousedown', stop, false);
+      el.removeEventListener('touchstart', stop, false);
+      el.removeEventListener('pointermove', stop, false);
+      el.removeEventListener('mousemove', stop, false);
+      el.removeEventListener('touchmove', stop, false);
     };
   }, []);
 
