@@ -2,6 +2,7 @@ import React from 'react';
 import { type NodeProps } from '@xyflow/react';
 import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
+import InteractiveZone from './InteractiveZone';
 import { Slider } from 'antd';
 import {
   formatVoltage,
@@ -65,11 +66,7 @@ const VRNode: React.FC<NodeProps> = (props) => {
                 </span>
               </div>
             )}
-            <div
-              className="nodrag nopan"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
+            <InteractiveZone>
               <span>电压调节:</span>
               <Slider
                 min={0.5}
@@ -78,7 +75,7 @@ const VRNode: React.FC<NodeProps> = (props) => {
                 value={s.outputVoltage}
                 onChange={data.onVoltageChange}
               />
-            </div>
+            </InteractiveZone>
           </div>
         </div>
       </div>

@@ -33,6 +33,8 @@ function computePowerSummary(nodes: TopologyNode[], edges: TopologyEdge[]) {
 
   for (const node of nodes) {
     const d = node.data;
+    const displayName = getNodeDisplayLabel(d as any) || d.label || node.id;
+
     // Source modules contribute input/output
     if (d.sourceData) {
       // Only count the top-level AC input as total input
@@ -42,27 +44,27 @@ function computePowerSummary(nodes: TopologyNode[], edges: TopologyEdge[]) {
     }
     // Gather power from all load modules
     if (d.cpuData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.cpuData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.cpuData.power });
       if (d.cpuData.temperature && d.cpuData.temperature > maxTemp) maxTemp = d.cpuData.temperature;
     }
     if (d.fanData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.fanData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.fanData.power });
       if (d.fanData.temperature && d.fanData.temperature > maxTemp) maxTemp = d.fanData.temperature;
     }
     if (d.memoryData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.memoryData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.memoryData.power });
       if (d.memoryData.temperature && d.memoryData.temperature > maxTemp) maxTemp = d.memoryData.temperature;
     }
     if (d.diskData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.diskData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.diskData.power });
       if (d.diskData.temperature && d.diskData.temperature > maxTemp) maxTemp = d.diskData.temperature;
     }
     if (d.ioData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.ioData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.ioData.power });
       if (d.ioData.temperature && d.ioData.temperature > maxTemp) maxTemp = d.ioData.temperature;
     }
     if (d.cardData) {
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.cardData.power });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.cardData.power });
       if (d.cardData.temperature && d.cardData.temperature > maxTemp) maxTemp = d.cardData.temperature;
     }
     if (d.sensorData) {
@@ -70,7 +72,7 @@ function computePowerSummary(nodes: TopologyNode[], edges: TopologyEdge[]) {
     }
     if (d.sourceData) {
       // Track source module output power for ranking
-      modulePowers.push({ name: d.label, type: d.nodeType, power: d.sourceData.outputPower });
+      modulePowers.push({ name: displayName, type: d.nodeType, power: d.sourceData.outputPower });
       if (d.sourceData.temperature && d.sourceData.temperature > maxTemp) maxTemp = d.sourceData.temperature;
     }
   }

@@ -2,6 +2,7 @@ import React from 'react';
 import { type NodeProps } from '@xyflow/react';
 import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
+import InteractiveZone from './InteractiveZone';
 import { Slider } from 'antd';
 import {
   formatPower,
@@ -41,11 +42,7 @@ const FanNode: React.FC<NodeProps> = (props) => {
             <div>功率: {formatPower(fan.power)}</div>
             <div>转速: {formatRPM(fan.rpm)}</div>
             <div>速度: {fan.speedPercent}%</div>
-            <div
-              className="nodrag nopan"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
+            <InteractiveZone>
               <span>速度控制:</span>
               <Slider
                 min={0}
@@ -53,7 +50,7 @@ const FanNode: React.FC<NodeProps> = (props) => {
                 value={fan.speedPercent}
                 onChange={data.onSpeedChange}
               />
-            </div>
+            </InteractiveZone>
           </div>
         </div>
       </div>
