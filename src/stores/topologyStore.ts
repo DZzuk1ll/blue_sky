@@ -56,6 +56,7 @@ interface TopologyState {
   // 控制类操作
   updateFanSpeed: (nodeId: string, speed: number) => void;
   updateSourceVoltage: (nodeId: string, voltage: number) => void;
+  updateNodeControlRange: (nodeId: string, range: { min: number; max: number } | undefined) => void;
 
   // 导入导出
   exportTopology: () => TopologyExportData;
@@ -238,6 +239,17 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
       nodes: nodes.map(n =>
         n.id === nodeId && n.data.sourceData
           ? { ...n, data: { ...n.data, sourceData: { ...n.data.sourceData, outputVoltage: voltage } } }
+          : n
+      ),
+    });
+  },
+
+  updateNodeControlRange: (nodeId, range) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, controlRange: range } }
           : n
       ),
     });

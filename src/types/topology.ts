@@ -32,6 +32,7 @@ export type HardwareNodeData = {
   displayAlias?: string;      // 用户自定义显示别名
   customIconUrl?: string;     // 用户上传的自定义图标 (Data URL)
   apiConfig?: ApiConfig;      // API 接口配置
+  controlRange?: { min: number; max: number };  // 控制范围（调速/调压的最小最大值）
 } & (
   | { nodeType: 'ac'; sourceData: SourceData }
   | { nodeType: 'psu'; sourceData: SourceData }

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Drawer, Descriptions, Slider, message, Tag, Typography } from 'antd';
 import { setFanSpeed, setVoltage } from '../../services/bmcApi';
+import { useTopologyStore } from '../../stores/topologyStore';
 import {
   formatVoltage,
   formatCurrent,
@@ -22,6 +23,9 @@ interface NodeDetailPanelProps {
 }
 
 const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }) => {
+  const updateFanSpeed = useTopologyStore((s) => s.updateFanSpeed);
+  const updateSourceVoltage = useTopologyStore((s) => s.updateSourceVoltage);
+
   const [fanSpeed, setFanSpeedLocal] = useState<number>(50);
   const [voltageValue, setVoltageValue] = useState<number>(1.0);
 
@@ -37,33 +41,40 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
     }
   }, [node]);
 
-  const handleFanSpeedChange = useCallback(async (value: number) => {
+  const handleFanSpeedComplete = useCallback(async (value: number) => {
     if (!node) return;
     setFanSpeedLocal(value);
+    // 更新 store 使拓扑节点显示同步
+    updateFanSpeed(node.id, value);
     try {
       await setFanSpeed(node.id, value);
       message.success(`风扇转速已设置为 ${value}%`);
     } catch {
       message.error('设置风扇转速失败');
     }
-  }, [node]);
+  }, [node, updateFanSpeed]);
 
-  const handleVoltageChange = useCallback(async (value: number) => {
+  const handleVoltageComplete = useCallback(async (value: number) => {
     if (!node) return;
     setVoltageValue(value);
+    // 更新 store 使拓扑节点显示同步
+    updateSourceVoltage(node.id, value);
     try {
       await setVoltage(node.id, value);
       message.success(`电压已设置为 ${value.toFixed(2)}V`);
     } catch {
       message.error('设置电压失败');
     }
-  }, [node]);
+  }, [node, updateSourceVoltage]);
 
   const renderContent = () => {
     if (!node?.data) return <div>暂无数据</div>;
 
     const { nodeType } = node.data;
     const d = node.data;
+
+    // 读取 controlRange 配置
+    const controlRange = d.controlRange as { min: number; max: number } | undefined;
 
     switch (nodeType) {
       case 'ac':
@@ -89,6 +100,15 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
       case 'psip': {
         const s = d.sourceData as SourceData;
         if (!s) return <div>暂无数据</div>;
+        const vMin = controlRange?.min ?? 0.5;
+        const vMax = controlRange?.max ?? 1.5;
+        const marks: Record<number, string> = {
+          [vMin]: `${vMin}V`,
+          [vMax]: `${vMax}V`,
+        };
+        // 添加中间刻度
+        const vMid = +((vMin + vMax) / 2).toFixed(2);
+        marks[vMid] = `${vMid}V`;
         return (
           <>
             <Descriptions column={1} bordered size="small">
@@ -105,13 +125,13 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
             <div style={{ marginTop: 16 }}>
               <Title level={5}>电压调节</Title>
               <Slider
-                min={0.5}
-                max={1.5}
+                min={vMin}
+                max={vMax}
                 step={0.01}
                 value={voltageValue}
                 onChange={setVoltageValue}
-                onChangeComplete={handleVoltageChange}
-                marks={{ 0.5: '0.5V', 0.8: '0.8V', 1.0: '1.0V', 1.2: '1.2V', 1.5: '1.5V' }}
+                onChangeComplete={handleVoltageComplete}
+                marks={marks}
               />
             </div>
           </>
@@ -121,6 +141,14 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
       case 'fan': {
         const f = d.fanData as FanData;
         if (!f) return <div>暂无数据</div>;
+        const sMin = controlRange?.min ?? 0;
+        const sMax = controlRange?.max ?? 100;
+        const marks: Record<number, string> = {
+          [sMin]: `${sMin}%`,
+          [sMax]: `${sMax}%`,
+        };
+        const sMid = Math.round((sMin + sMax) / 2);
+        marks[sMid] = `${sMid}%`;
         return (
           <>
             <Descriptions column={1} bordered size="small">
@@ -134,12 +162,12 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
             <div style={{ marginTop: 16 }}>
               <Title level={5}>风扇转速控制</Title>
               <Slider
-                min={0}
-                max={100}
+                min={sMin}
+                max={sMax}
                 value={fanSpeed}
                 onChange={setFanSpeedLocal}
-                onChangeComplete={handleFanSpeedChange}
-                marks={{ 0: '0%', 25: '25%', 50: '50%', 75: '75%', 100: '100%' }}
+                onChangeComplete={handleFanSpeedComplete}
+                marks={marks}
               />
             </div>
           </>

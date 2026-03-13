@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { type NodeProps } from '@xyflow/react';
 import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 import InteractiveZone from './InteractiveZone';
-import { Slider } from 'antd';
 import {
   formatVoltage,
   formatCurrent,
@@ -22,6 +21,7 @@ const PSIPNode: React.FC<NodeProps> = (props) => {
     displayAlias?: string;
     customIconUrl?: string;
     nodeType?: string;
+    controlRange?: { min: number; max: number };
     sourceData: {
       inputVoltage: number;
       outputVoltage: number;
@@ -34,6 +34,14 @@ const PSIPNode: React.FC<NodeProps> = (props) => {
     onVoltageChange?: (voltage: number) => void;
   };
   const s = data.sourceData;
+  const range = data.controlRange ?? { min: 0.5, max: 1.5 };
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      data.onVoltageChange?.(Number(e.target.value));
+    },
+    [data.onVoltageChange],
+  );
 
   return (
     <div className="hardware-node source-node">
@@ -67,13 +75,15 @@ const PSIPNode: React.FC<NodeProps> = (props) => {
               </div>
             )}
             <InteractiveZone>
-              <span>电压调节:</span>
-              <Slider
-                min={0.5}
-                max={1.5}
+              <span style={{ fontSize: 11, color: '#666' }}>电压调节: {s.outputVoltage.toFixed(2)}V</span>
+              <input
+                type="range"
+                min={range.min}
+                max={range.max}
                 step={0.01}
                 value={s.outputVoltage}
-                onChange={data.onVoltageChange}
+                onChange={handleChange}
+                style={{ width: '100%', cursor: 'pointer' }}
               />
             </InteractiveZone>
           </div>

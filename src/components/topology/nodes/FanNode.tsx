@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { type NodeProps } from '@xyflow/react';
 import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 import InteractiveZone from './InteractiveZone';
-import { Slider } from 'antd';
 import {
   formatPower,
   formatRPM,
@@ -17,6 +16,7 @@ const FanNode: React.FC<NodeProps> = (props) => {
     displayAlias?: string;
     customIconUrl?: string;
     nodeType?: string;
+    controlRange?: { min: number; max: number };
     fanData: {
       power: number;
       rpm: number;
@@ -26,6 +26,14 @@ const FanNode: React.FC<NodeProps> = (props) => {
     onSpeedChange?: (speed: number) => void;
   };
   const fan = data.fanData;
+  const range = data.controlRange ?? { min: 0, max: 100 };
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      data.onSpeedChange?.(Number(e.target.value));
+    },
+    [data.onSpeedChange],
+  );
 
   return (
     <div className="hardware-node fan-node">
@@ -43,12 +51,15 @@ const FanNode: React.FC<NodeProps> = (props) => {
             <div>转速: {formatRPM(fan.rpm)}</div>
             <div>速度: {fan.speedPercent}%</div>
             <InteractiveZone>
-              <span>速度控制:</span>
-              <Slider
-                min={0}
-                max={100}
+              <span style={{ fontSize: 11, color: '#666' }}>速度控制: {fan.speedPercent}%</span>
+              <input
+                type="range"
+                min={range.min}
+                max={range.max}
+                step={1}
                 value={fan.speedPercent}
-                onChange={data.onSpeedChange}
+                onChange={handleChange}
+                style={{ width: '100%', cursor: 'pointer' }}
               />
             </InteractiveZone>
           </div>
