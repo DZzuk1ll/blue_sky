@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, Tooltip } from 'antd';
+import React, { useCallback, useRef } from 'react';
+import { Button, Tooltip, message } from 'antd';
 import {
   ZoomInOutlined,
   ZoomOutOutlined,
@@ -7,8 +7,11 @@ import {
   DeleteOutlined,
   ClearOutlined,
   ReloadOutlined,
+  DownloadOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { useReactFlow } from '@xyflow/react';
+import { useTopologyStore } from '../../stores/topologyStore';
 
 interface DesignToolbarProps {
   onDelete: () => void;
@@ -18,13 +21,54 @@ interface DesignToolbarProps {
 
 const DesignToolbar: React.FC<DesignToolbarProps> = ({ onDelete, onClear, onReset }) => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { exportTopology, importTopology } = useTopologyStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = useCallback(() => {
+    const data = exportTopology();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `topology-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    message.success('拓扑已导出');
+  }, [exportTopology]);
+
+  const handleImport = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        const success = importTopology(data);
+        if (success) {
+          message.success('拓扑已导入');
+        } else {
+          message.error('文件格式不正确，请检查 JSON 格式');
+        }
+      } catch {
+        message.error('文件解析失败，请检查 JSON 格式');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }, [importTopology]);
 
   const buttons = [
     { title: '放大', icon: <ZoomInOutlined />, onClick: () => zoomIn() },
     { title: '缩小', icon: <ZoomOutOutlined />, onClick: () => zoomOut() },
     { title: '适应画布', icon: <ExpandOutlined />, onClick: () => fitView() },
-    { title: '删除选中', icon: <DeleteOutlined />, onClick: onDelete },
+    { title: '删除选中 (Del)', icon: <DeleteOutlined />, onClick: onDelete },
     { title: '清空画布', icon: <ClearOutlined />, onClick: onClear },
+    { title: '导出拓扑', icon: <DownloadOutlined />, onClick: handleExport },
+    { title: '导入拓扑', icon: <UploadOutlined />, onClick: handleImport },
     { title: '重置默认', icon: <ReloadOutlined />, onClick: onReset },
   ];
 
@@ -49,6 +93,13 @@ const DesignToolbar: React.FC<DesignToolbarProps> = ({ onDelete, onClear, onRese
           <Button type="text" size="small" icon={icon} onClick={onClick} />
         </Tooltip>
       ))}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };

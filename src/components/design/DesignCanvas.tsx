@@ -17,6 +17,7 @@ import PowerEdge from '../topology/edges/PowerEdge';
 import DesignToolbar from './DesignToolbar';
 import ModulePalette from './ModulePalette';
 import IconPicker from './IconPicker';
+import NodeEditPanel from './NodeEditPanel';
 import { useTopologyStore } from '../../stores/topologyStore';
 import type { HardwareNodeType, TopologyNode } from '../../types/topology';
 
@@ -95,6 +96,22 @@ const DesignCanvasInner: React.FC = () => {
       })),
     [nodes, highlightedNodeIds],
   );
+
+  // 编辑面板：双击节点打开
+  const [editingNode, setEditingNode] = useState<TopologyNode | null>(null);
+
+  const handleNodeDoubleClick = useCallback(
+    (_event: React.MouseEvent, node: TopologyNode) => {
+      setEditingNode(node);
+    },
+    [],
+  );
+
+  // 当选中节点数据变化时同步到编辑面板
+  const currentEditingNode = useMemo(() => {
+    if (!editingNode) return null;
+    return nodes.find((n) => n.id === editingNode.id) || null;
+  }, [nodes, editingNode]);
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -207,6 +224,7 @@ const DesignCanvasInner: React.FC = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onPaneClick={handlePaneClick}
+          onNodeDoubleClick={handleNodeDoubleClick}
           onNodeContextMenu={handleNodeContextMenu}
           fitView
           connectionLineStyle={{ stroke: '#1677ff', strokeWidth: 2 }}
@@ -222,6 +240,14 @@ const DesignCanvasInner: React.FC = () => {
             onReset={resetToDefault}
           />
         </ReactFlow>
+
+        {/* 右键菜单 - 图标选择 */}
+        {/* 节点编辑面板 */}
+        <NodeEditPanel
+          open={currentEditingNode !== null}
+          onClose={() => setEditingNode(null)}
+          node={currentEditingNode}
+        />
 
         {/* 右键菜单 - 图标选择 */}
         {contextMenu && (

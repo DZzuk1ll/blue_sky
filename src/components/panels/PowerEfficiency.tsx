@@ -41,42 +41,46 @@ const stageColumns: ColumnsType<StageRow> = [
   { title: '损耗(W)', dataIndex: 'loss', key: 'loss' },
 ];
 
-/* ── Waterfall bar chart option ── */
+/* ── 链路损耗柱状图：所有柱体以 Y 轴 0 为基准线 ── */
 function getLossChartOption() {
   const stages = STAGE_DATA.map((s) => s.stage);
   const losses = STAGE_DATA.map((s) => s.loss);
-  const cumulative: number[] = [];
-  losses.reduce((acc, l, i) => {
-    cumulative[i] = acc;
-    return acc + l;
-  }, 0);
 
   return {
     tooltip: {
       trigger: 'axis',
       formatter: (params: any) => {
-        const p = params.find((x: any) => x.seriesName === '损耗');
-        return p ? `${p.name}<br/>损耗: ${p.value}W` : '';
+        const p = Array.isArray(params) ? params[0] : params;
+        if (!p) return '';
+        return `${p.name}<br/>损耗: ${p.value}W`;
       },
     },
-    grid: { left: 60, right: 20, top: 20, bottom: 60 },
+    grid: { left: 60, right: 20, top: 30, bottom: 60 },
     xAxis: { type: 'category', data: stages, axisLabel: { rotate: 20 } },
-    yAxis: { type: 'value', name: '损耗(W)' },
+    yAxis: {
+      type: 'value',
+      name: '损耗(W)',
+      min: 0,
+      minInterval: 1,
+    },
     series: [
-      {
-        name: '基底',
-        type: 'bar',
-        stack: 'total',
-        itemStyle: { color: 'transparent' },
-        data: cumulative,
-      },
       {
         name: '损耗',
         type: 'bar',
-        stack: 'total',
         data: losses,
-        itemStyle: { color: '#ff7a45' },
-        label: { show: true, position: 'top', formatter: '{c}W' },
+        barWidth: '50%',
+        itemStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: '#ff7a45' },
+              { offset: 1, color: '#ffa940' },
+            ],
+          },
+          borderRadius: [4, 4, 0, 0],
+        },
+        label: { show: true, position: 'top', formatter: '{c}W', fontSize: 12, color: '#595959' },
       },
     ],
   };

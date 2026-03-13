@@ -103,14 +103,17 @@ const TopologyCanvas: React.FC = () => {
     [setSelectedNodeIds],
   );
 
-  // Only open detail panel on deliberate click (not drag)
+  // 单击仅选中节点（高亮），不弹出详情面板
   const handleNodeClick: NodeMouseHandler<TopologyNode> = useCallback(
+    () => {
+      // 单击不打开面板，仅通过 onSelectionChange 高亮
+    },
+    [],
+  );
+
+  // 双击打开详情面板（300ms 内响应）
+  const handleNodeDoubleClick: NodeMouseHandler<TopologyNode> = useCallback(
     (_event, node) => {
-      // Don't open panel if this was a drag
-      if (isDragging.current) {
-        isDragging.current = false;
-        return;
-      }
       setSelectedNode(node);
     },
     [],
@@ -172,6 +175,7 @@ const TopologyCanvas: React.FC = () => {
         onEdgesChange={onEdgesChange}
         onSelectionChange={handleSelectionChange}
         onNodeClick={handleNodeClick}
+        onNodeDoubleClick={handleNodeDoubleClick}
         onNodeDragStart={handleNodeDragStart}
         onNodeDrag={handleNodeDrag}
         onPaneClick={handlePaneClick}

@@ -52,3 +52,19 @@ export function getLossColor(lossPercent: number): string {
   if (lossPercent < 3) return '#faad14';
   return '#ff4d4f';
 }
+
+/** 模块类型大写缩写 */
+const typeUpperMap: Record<string, string> = {
+  ac: 'AC', psu: 'PSU', vr: 'VR', psip: 'PSIP',
+  cpu: 'CPU', memory: 'MEM', fan: 'FAN', disk: 'DISK',
+  io: 'IO', card: 'CARD', sensor: 'SENSOR', mgmtBoard: 'MGMT', chassis: 'CHASSIS',
+};
+
+/** 获取节点显示标签：有别名时显示 "别名 (类型)"，否则显示原 label */
+export function getNodeDisplayLabel(data: { label?: string; displayAlias?: string; nodeType?: string }): string {
+  if (data.displayAlias && data.nodeType) {
+    const typeTag = typeUpperMap[data.nodeType] || data.nodeType.toUpperCase();
+    return `${data.displayAlias} (${typeTag})`;
+  }
+  return data.label || data.nodeType || '';
+}

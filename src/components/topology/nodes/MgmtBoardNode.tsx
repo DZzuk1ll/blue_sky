@@ -6,12 +6,16 @@ import { Tag } from 'antd';
 import {
   formatTemperature,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const MgmtBoardNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     mgmtData?: {
       status: 'online' | 'offline';
       temperature: number;
@@ -24,11 +28,11 @@ const MgmtBoardNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="mgmtBoard" customIcon={data.customIcon} />
+          <NodeIcon nodeType="mgmtBoard" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? '管理板'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>

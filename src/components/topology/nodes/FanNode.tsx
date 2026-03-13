@@ -6,12 +6,16 @@ import { Slider } from 'antd';
 import {
   formatPower,
   formatRPM,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const FanNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     fanData: {
       power: number;
       rpm: number;
@@ -27,11 +31,11 @@ const FanNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="fan" customIcon={data.customIcon} />
+          <NodeIcon nodeType="fan" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? 'Fan'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>功率: {formatPower(fan.power)}</div>

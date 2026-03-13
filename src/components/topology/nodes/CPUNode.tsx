@@ -7,12 +7,16 @@ import {
   formatPower,
   formatTemperature,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const CPUNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     cpuData: {
       power: number;
       temperature?: number;
@@ -35,11 +39,11 @@ const CPUNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="cpu" customIcon={data.customIcon} />
+          <NodeIcon nodeType="cpu" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? 'CPU'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>功率: {formatPower(cpu.power)}</div>

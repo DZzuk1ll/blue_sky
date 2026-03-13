@@ -2,19 +2,20 @@ import React from 'react';
 import { type NodeProps } from '@xyflow/react';
 import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
+import { getNodeDisplayLabel } from '../../../utils/formatters';
 
 const ChassisNode: React.FC<NodeProps> = (props) => {
-  const data = props.data as { label?: string; customIcon?: string };
+  const data = props.data as { label?: string; customIcon?: string; displayAlias?: string; customIconUrl?: string; nodeType?: string };
 
   return (
     <div className="hardware-node">
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="chassis" customIcon={data.customIcon} />
+          <NodeIcon nodeType="chassis" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? '机框'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
         </div>
       </div>
