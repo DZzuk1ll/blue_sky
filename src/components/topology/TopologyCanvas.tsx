@@ -180,9 +180,10 @@ const TopologyCanvas: React.FC = () => {
         onNodeDrag={handleNodeDrag}
         onPaneClick={handlePaneClick}
         nodesDraggable={false}
+        zoomOnDoubleClick={false}
         fitView
       >
-        <Controls />
+        <Controls showInteractive={false} />
         <MiniMap />
         <Toolbar
           onCopy={copySelectedNodes}

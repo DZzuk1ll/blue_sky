@@ -65,7 +65,7 @@ const PSIPNode: React.FC<NodeProps> = (props) => {
                 </span>
               </div>
             )}
-            <div>
+            <div className="nodrag nopan">
               <span>电压调节:</span>
               <Slider
                 min={0.5}
