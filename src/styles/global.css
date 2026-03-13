@@ -304,61 +304,46 @@ html, body, #root {
   background: #e6f4ff;
 }
 
-/* === 节点缩放控制按钮 === */
+/* === 节点缩放 - 四角拖拽手柄 === */
 .scalable-node-wrapper {
   position: relative;
 }
 
-.node-scale-controls {
+.node-resize-handle {
   position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #fff;
+  border: 2px solid #1677ff;
   opacity: 0;
   transition: opacity 0.2s;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  padding: 2px;
   pointer-events: auto;
+  z-index: 10;
+  touch-action: none;
 }
 
-.scalable-node-wrapper:hover .node-scale-controls {
+.scalable-node-wrapper:hover .node-resize-handle {
   opacity: 1;
 }
 
-.scale-btn {
-  width: 24px;
-  height: 22px;
+.node-resize-handle:hover {
+  background: #1677ff;
+  border-color: #1677ff;
+}
+
+.node-scale-badge {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  font-size: 10px;
+  color: #8c8c8c;
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid #d9d9d9;
   border-radius: 3px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #595959;
-  padding: 0;
-  line-height: 1;
-  transition: all 0.15s;
-}
-
-.scale-btn:hover {
-  border-color: #1677ff;
-  color: #1677ff;
-  background: #e6f4ff;
-}
-
-.scale-btn-reset {
-  width: auto;
-  padding: 0 6px;
-  font-size: 10px;
-  font-weight: 500;
-  color: #8c8c8c;
+  padding: 0 4px;
+  line-height: 16px;
+  pointer-events: none;
 }
 
 /* === 连线高亮 - 选中节点的关联节点高亮 === */

@@ -65,7 +65,11 @@ const VRNode: React.FC<NodeProps> = (props) => {
                 </span>
               </div>
             )}
-            <div className="nodrag nopan">
+            <div
+              className="nodrag nopan"
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
               <span>电压调节:</span>
               <Slider
                 min={0.5}

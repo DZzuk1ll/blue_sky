@@ -30,7 +30,6 @@ const TopologyCanvas: React.FC = () => {
     setSelectedNodeIds,
     copySelectedNodes,
     pasteNodes,
-    deleteSelectedNodes,
     resetToDefault,
   } = useTopologyStore();
 
@@ -150,9 +149,7 @@ const TopologyCanvas: React.FC = () => {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        deleteSelectedNodes();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         e.preventDefault();
         copySelectedNodes();
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
@@ -162,7 +159,7 @@ const TopologyCanvas: React.FC = () => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [copySelectedNodes, pasteNodes, deleteSelectedNodes]);
+  }, [copySelectedNodes, pasteNodes]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: '#fff' }}>
@@ -188,7 +185,6 @@ const TopologyCanvas: React.FC = () => {
         <Toolbar
           onCopy={copySelectedNodes}
           onPaste={pasteNodes}
-          onDelete={deleteSelectedNodes}
           onReset={resetToDefault}
         />
       </ReactFlow>
