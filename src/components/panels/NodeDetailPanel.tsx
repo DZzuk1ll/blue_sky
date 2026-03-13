@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Drawer, Descriptions, Slider, message, Tag, Typography } from 'antd';
-import { setFanSpeed } from '../../services/bmcApi';
+import { setFanSpeed, setVoltage } from '../../services/bmcApi';
 import {
   formatVoltage,
   formatCurrent,
@@ -23,6 +23,19 @@ interface NodeDetailPanelProps {
 
 const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }) => {
   const [fanSpeed, setFanSpeedLocal] = useState<number>(50);
+  const [voltageValue, setVoltageValue] = useState<number>(1.0);
+
+  // 当节点变化时，同步初始值
+  useEffect(() => {
+    if (!node?.data) return;
+    const { nodeType } = node.data;
+    if (nodeType === 'fan' && node.data.fanData) {
+      setFanSpeedLocal(node.data.fanData.speedPercent ?? 50);
+    }
+    if ((nodeType === 'vr' || nodeType === 'psip') && node.data.sourceData) {
+      setVoltageValue(node.data.sourceData.outputVoltage ?? 1.0);
+    }
+  }, [node]);
 
   const handleFanSpeedChange = useCallback(async (value: number) => {
     if (!node) return;
@@ -35,6 +48,17 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
     }
   }, [node]);
 
+  const handleVoltageChange = useCallback(async (value: number) => {
+    if (!node) return;
+    setVoltageValue(value);
+    try {
+      await setVoltage(node.id, value);
+      message.success(`电压已设置为 ${value.toFixed(2)}V`);
+    } catch {
+      message.error('设置电压失败');
+    }
+  }, [node]);
+
   const renderContent = () => {
     if (!node?.data) return <div>暂无数据</div>;
 
@@ -43,9 +67,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
 
     switch (nodeType) {
       case 'ac':
-      case 'psu':
-      case 'vr':
-      case 'psip': {
+      case 'psu': {
         const s = d.sourceData as SourceData;
         if (!s) return <div>暂无数据</div>;
         return (
@@ -60,6 +82,39 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ open, onClose, node }
               <Descriptions.Item label="温度">{formatTemperature(s.temperature)}</Descriptions.Item>
             )}
           </Descriptions>
+        );
+      }
+
+      case 'vr':
+      case 'psip': {
+        const s = d.sourceData as SourceData;
+        if (!s) return <div>暂无数据</div>;
+        return (
+          <>
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="输入电压">{formatVoltage(s.inputVoltage)}</Descriptions.Item>
+              <Descriptions.Item label="输出电压">{formatVoltage(s.outputVoltage)}</Descriptions.Item>
+              <Descriptions.Item label="电流">{formatCurrent(s.current)}</Descriptions.Item>
+              <Descriptions.Item label="输入功率">{formatPower(s.inputPower)}</Descriptions.Item>
+              <Descriptions.Item label="输出功率">{formatPower(s.outputPower)}</Descriptions.Item>
+              <Descriptions.Item label="转换效率">{formatEfficiency(s.efficiency)}</Descriptions.Item>
+              {s.temperature != null && (
+                <Descriptions.Item label="温度">{formatTemperature(s.temperature)}</Descriptions.Item>
+              )}
+            </Descriptions>
+            <div style={{ marginTop: 16 }}>
+              <Title level={5}>电压调节</Title>
+              <Slider
+                min={0.5}
+                max={1.5}
+                step={0.01}
+                value={voltageValue}
+                onChange={setVoltageValue}
+                onChangeComplete={handleVoltageChange}
+                marks={{ 0.5: '0.5V', 0.8: '0.8V', 1.0: '1.0V', 1.2: '1.2V', 1.5: '1.5V' }}
+              />
+            </div>
+          </>
         );
       }
 

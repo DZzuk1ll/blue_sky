@@ -71,7 +71,7 @@ const AppLayout: React.FC = () => {
             </Typography.Text>
           )}
         </Header>
-        <Content style={{ position: 'relative', overflow: 'hidden' }}>
+        <Content style={{ position: 'relative', overflow: 'auto' }}>
           <Outlet />
         </Content>
       </Layout>
