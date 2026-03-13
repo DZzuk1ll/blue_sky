@@ -31,6 +31,8 @@ const TopologyCanvas: React.FC = () => {
     copySelectedNodes,
     pasteNodes,
     resetToDefault,
+    updateFanSpeed,
+    updateSourceVoltage,
   } = useTopologyStore();
 
   const [selectedNode, setSelectedNode] = useState<TopologyNode | null>(null);
@@ -68,17 +70,23 @@ const TopologyCanvas: React.FC = () => {
     return ids;
   }, [edges, selectedNodeIds]);
 
-  // 注入高亮标记到节点 data
+  // 注入高亮标记和控制回调到节点 data
   const processedNodes = useMemo(
     () =>
-      nodes.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
+      nodes.map((n) => {
+        const extra: Record<string, unknown> = {
           _highlighted: highlightedNodeIds.has(n.id),
-        },
-      })),
-    [nodes, highlightedNodeIds],
+        };
+        // 注入控制回调
+        if (n.data.nodeType === 'fan') {
+          extra.onSpeedChange = (speed: number) => updateFanSpeed(n.id, speed);
+        }
+        if (n.data.nodeType === 'vr' || n.data.nodeType === 'psip') {
+          extra.onVoltageChange = (voltage: number) => updateSourceVoltage(n.id, voltage);
+        }
+        return { ...n, data: { ...n.data, ...extra } };
+      }),
+    [nodes, highlightedNodeIds, updateFanSpeed, updateSourceVoltage],
   );
 
   // 注入高亮标记到边 data

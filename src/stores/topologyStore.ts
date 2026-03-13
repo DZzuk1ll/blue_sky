@@ -53,6 +53,10 @@ interface TopologyState {
   updateNodeCustomIconUrl: (nodeId: string, url: string | undefined) => void;
   updateNodeApiConfig: (nodeId: string, config: ApiConfig) => void;
 
+  // 控制类操作
+  updateFanSpeed: (nodeId: string, speed: number) => void;
+  updateSourceVoltage: (nodeId: string, voltage: number) => void;
+
   // 导入导出
   exportTopology: () => TopologyExportData;
   importTopology: (data: TopologyExportData) => boolean;
@@ -212,6 +216,28 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
       nodes: nodes.map(n =>
         n.id === nodeId
           ? { ...n, data: { ...n.data, apiConfig: config } }
+          : n
+      ),
+    });
+  },
+
+  updateFanSpeed: (nodeId, speed) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId && n.data.fanData
+          ? { ...n, data: { ...n.data, fanData: { ...n.data.fanData, speedPercent: speed } } }
+          : n
+      ),
+    });
+  },
+
+  updateSourceVoltage: (nodeId, voltage) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId && n.data.sourceData
+          ? { ...n, data: { ...n.data, sourceData: { ...n.data.sourceData, outputVoltage: voltage } } }
           : n
       ),
     });
