@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Drawer, Input, Button, Upload, message, Tabs, Select, Typography, Divider, Tag } from 'antd';
+import { Drawer, Input, InputNumber, Button, Upload, message, Tabs, Select, Typography, Divider, Tag } from 'antd';
 import {
   EditOutlined,
   UploadOutlined,
   ApiOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
+  ControlOutlined,
 } from '@ant-design/icons';
 import { useTopologyStore } from '../../stores/topologyStore';
 import type { TopologyNode, HardwareNodeType, ApiConfig } from '../../types/topology';
@@ -49,13 +50,25 @@ interface NodeEditPanelProps {
   node: TopologyNode | null;
 }
 
+/** 可控模块类型（支持调速/调压） */
+const controllableTypes: HardwareNodeType[] = ['fan', 'vr', 'psip'];
+
+/** 各可控类型的默认范围 */
+const defaultRanges: Record<string, { min: number; max: number; step: number; unit: string; label: string }> = {
+  fan:  { min: 0, max: 100, step: 1, unit: '%', label: '调速范围' },
+  vr:   { min: 0.5, max: 1.5, step: 0.01, unit: 'V', label: '调压范围' },
+  psip: { min: 0.5, max: 1.5, step: 0.01, unit: 'V', label: '调压范围' },
+};
+
 const NodeEditPanel: React.FC<NodeEditPanelProps> = ({ open, onClose, node }) => {
-  const { updateNodeAlias, updateNodeCustomIconUrl, updateNodeApiConfig } = useTopologyStore();
+  const { updateNodeAlias, updateNodeCustomIconUrl, updateNodeApiConfig, updateNodeControlRange } = useTopologyStore();
 
   const [alias, setAlias] = useState('');
   const [monitorUrl, setMonitorUrl] = useState('');
   const [controlUrl, setControlUrl] = useState('');
   const [controlMethod, setControlMethod] = useState<'POST' | 'PUT'>('POST');
+  const [rangeMin, setRangeMin] = useState<number | null>(null);
+  const [rangeMax, setRangeMax] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 同步外部 node 数据到本地状态
@@ -65,6 +78,12 @@ const NodeEditPanel: React.FC<NodeEditPanelProps> = ({ open, onClose, node }) =>
       setMonitorUrl(node.data.apiConfig?.monitorApi?.url || '');
       setControlUrl(node.data.apiConfig?.controlApi?.url || '');
       setControlMethod(node.data.apiConfig?.controlApi?.method || 'POST');
+      const nt = node.data.nodeType as HardwareNodeType;
+      const defaults = defaultRanges[nt];
+      if (defaults) {
+        setRangeMin(node.data.controlRange?.min ?? defaults.min);
+        setRangeMax(node.data.controlRange?.max ?? defaults.max);
+      }
     }
   }, [node]);
 
@@ -115,6 +134,21 @@ const NodeEditPanel: React.FC<NodeEditPanelProps> = ({ open, onClose, node }) =>
     updateNodeCustomIconUrl(node.id, undefined);
     message.success('已恢复默认图标');
   }, [node, updateNodeCustomIconUrl]);
+
+  // 保存控制范围
+  const handleSaveControlRange = useCallback(() => {
+    if (!node || !nodeType) return;
+    const defaults = defaultRanges[nodeType];
+    if (!defaults) return;
+    const min = rangeMin ?? defaults.min;
+    const max = rangeMax ?? defaults.max;
+    if (min >= max) {
+      message.error('最小值必须小于最大值');
+      return;
+    }
+    updateNodeControlRange(node.id, { min, max });
+    message.success('控制范围已保存');
+  }, [node, nodeType, rangeMin, rangeMax, updateNodeControlRange]);
 
   // 保存 API 配置
   const handleSaveApiConfig = useCallback(() => {
@@ -218,6 +252,66 @@ const NodeEditPanel: React.FC<NodeEditPanelProps> = ({ open, onClose, node }) =>
       </div>
     </div>
   );
+
+  const renderControlTab = () => {
+    if (!nodeType) return null;
+    const defaults = defaultRanges[nodeType];
+    if (!defaults) return null;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div>
+          <Title level={5} style={{ margin: 0 }}>
+            <ControlOutlined /> {defaults.label}
+          </Title>
+          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+            设置在拓扑监控界面中该模块滑块的最小值和最大值
+          </Text>
+
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ flex: 1 }}>
+              <Text style={{ display: 'block', marginBottom: 4, fontSize: 12 }}>最小值 ({defaults.unit})</Text>
+              <InputNumber
+                style={{ width: '100%' }}
+                value={rangeMin}
+                onChange={(v) => setRangeMin(v)}
+                step={defaults.step}
+                placeholder={`默认 ${defaults.min}`}
+              />
+            </div>
+            <span style={{ marginTop: 20 }}>~</span>
+            <div style={{ flex: 1 }}>
+              <Text style={{ display: 'block', marginBottom: 4, fontSize: 12 }}>最大值 ({defaults.unit})</Text>
+              <InputNumber
+                style={{ width: '100%' }}
+                value={rangeMax}
+                onChange={(v) => setRangeMax(v)}
+                step={defaults.step}
+                placeholder={`默认 ${defaults.max}`}
+              />
+            </div>
+          </div>
+
+          <div style={{
+            padding: '8px 12px',
+            background: '#f6f8fa',
+            border: '1px solid #e8e8e8',
+            borderRadius: 6,
+            marginBottom: 12,
+          }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              <InfoCircleOutlined /> 当前范围：{rangeMin ?? defaults.min}{defaults.unit} ~ {rangeMax ?? defaults.max}{defaults.unit}
+              （默认：{defaults.min}{defaults.unit} ~ {defaults.max}{defaults.unit}）
+            </Text>
+          </div>
+
+          <Button type="primary" onClick={handleSaveControlRange} block>
+            保存控制范围
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const renderApiTab = () => {
     const monitorTemplate = nodeType ? monitorResponseTemplates[nodeType] : {};
@@ -335,6 +429,11 @@ const NodeEditPanel: React.FC<NodeEditPanelProps> = ({ open, onClose, node }) =>
               label: <span><EditOutlined /> 基本信息</span>,
               children: renderBasicTab(),
             },
+            ...(nodeType && controllableTypes.includes(nodeType) ? [{
+              key: 'control',
+              label: <span><ControlOutlined /> 控制范围</span>,
+              children: renderControlTab(),
+            }] : []),
             {
               key: 'api',
               label: <span><ApiOutlined /> API 配置</span>,
