@@ -11,12 +11,27 @@ export type HardwareNodeType =
   | 'cpu' | 'memory' | 'fan' | 'disk'
   | 'io' | 'card' | 'sensor' | 'mgmtBoard' | 'chassis';
 
+/** API 配置（监测接口 + 控制接口） */
+export interface ApiConfig {
+  monitorApi?: {
+    url: string;
+    method: 'GET';
+  };
+  controlApi?: {
+    url: string;
+    method: 'POST' | 'PUT';
+  };
+}
+
 /** 节点数据联合类型 */
 export type HardwareNodeData = {
   label: string;
   nodeType: HardwareNodeType;
   category: 'source' | 'path' | 'load' | 'other';
   customIcon?: string;
+  displayAlias?: string;      // 用户自定义显示别名
+  customIconUrl?: string;     // 用户上传的自定义图标 (Data URL)
+  apiConfig?: ApiConfig;      // API 接口配置
 } & (
   | { nodeType: 'ac'; sourceData: SourceData }
   | { nodeType: 'psu'; sourceData: SourceData }
@@ -49,3 +64,12 @@ export interface PowerEdgeData {
 
 /** React Flow边类型 */
 export type TopologyEdge = Edge<PowerEdgeData>;
+
+/** 拓扑导出数据格式 */
+export interface TopologyExportData {
+  version: string;
+  exportTime: string;
+  nodes: TopologyNode[];
+  edges: TopologyEdge[];
+  nodeScales: Record<string, number>;
+}

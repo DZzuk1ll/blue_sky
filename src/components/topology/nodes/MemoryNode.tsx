@@ -7,12 +7,16 @@ import {
   formatPower,
   formatTemperature,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const MemoryNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     memoryData: {
       power: number;
       temperature?: number;
@@ -26,11 +30,11 @@ const MemoryNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="memory" customIcon={data.customIcon} />
+          <NodeIcon nodeType="memory" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? 'Memory'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>功率: {formatPower(mem.power)}</div>

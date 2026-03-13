@@ -30,9 +30,21 @@ const FanSvgIcon = () => (
 interface NodeIconProps {
   nodeType: HardwareNodeType;
   customIcon?: string;
+  customIconUrl?: string;
 }
 
-const NodeIcon: React.FC<NodeIconProps> = ({ nodeType, customIcon }) => {
+const NodeIcon: React.FC<NodeIconProps> = ({ nodeType, customIcon, customIconUrl }) => {
+  // 优先使用用户上传的自定义图标
+  if (customIconUrl) {
+    return (
+      <img
+        src={customIconUrl}
+        alt="custom icon"
+        style={{ width: '1em', height: '1em', objectFit: 'contain' }}
+      />
+    );
+  }
+
   const iconName = customIcon || defaultIconMap[nodeType];
 
   // Special case for fan custom SVG

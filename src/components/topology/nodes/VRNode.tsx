@@ -11,12 +11,16 @@ import {
   formatTemperature,
   getEfficiencyColor,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const VRNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     sourceData: {
       inputVoltage: number;
       outputVoltage: number;
@@ -35,11 +39,11 @@ const VRNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="vr" customIcon={data.customIcon} />
+          <NodeIcon nodeType="vr" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? 'VR'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>输入电压: {formatVoltage(s.inputVoltage)}</div>

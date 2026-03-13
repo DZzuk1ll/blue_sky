@@ -7,7 +7,7 @@ import {
   type EdgeChange,
   type Connection,
 } from '@xyflow/react';
-import type { TopologyNode, TopologyEdge, HardwareNodeType } from '../types/topology';
+import type { TopologyNode, TopologyEdge, HardwareNodeType, ApiConfig, TopologyExportData } from '../types/topology';
 import { getDefaultNodes, getDefaultEdges, createDefaultNodeData } from '../services/mockData';
 
 interface ClipboardItem {
@@ -47,6 +47,15 @@ interface TopologyState {
   removeEdge: (id: string) => void;
   updateEdgeLabel: (edgeId: string, label: string | undefined) => void;
   updateNodeIcon: (nodeId: string, iconName: string) => void;
+
+  // 别名 & 自定义图标 & API配置
+  updateNodeAlias: (nodeId: string, alias: string) => void;
+  updateNodeCustomIconUrl: (nodeId: string, url: string | undefined) => void;
+  updateNodeApiConfig: (nodeId: string, config: ApiConfig) => void;
+
+  // 导入导出
+  exportTopology: () => TopologyExportData;
+  importTopology: (data: TopologyExportData) => boolean;
 
   // 重置
   resetToDefault: () => void;
@@ -175,12 +184,71 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
     });
   },
 
+  updateNodeAlias: (nodeId, alias) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, displayAlias: alias || undefined } }
+          : n
+      ),
+    });
+  },
+
+  updateNodeCustomIconUrl: (nodeId, url) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, customIconUrl: url } }
+          : n
+      ),
+    });
+  },
+
+  updateNodeApiConfig: (nodeId, config) => {
+    const { nodes } = get();
+    set({
+      nodes: nodes.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, apiConfig: config } }
+          : n
+      ),
+    });
+  },
+
+  exportTopology: () => {
+    const { nodes, edges, nodeScales } = get();
+    return {
+      version: '1.0.0',
+      exportTime: new Date().toISOString(),
+      nodes,
+      edges,
+      nodeScales,
+    };
+  },
+
+  importTopology: (data) => {
+    if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
+      return false;
+    }
+    set({
+      nodes: data.nodes,
+      edges: data.edges,
+      nodeScales: data.nodeScales || {},
+      selectedNodeIds: [],
+      clipboard: [],
+    });
+    return true;
+  },
+
   resetToDefault: () => {
     set({
       nodes: getDefaultNodes(),
       edges: getDefaultEdges(),
       selectedNodeIds: [],
       clipboard: [],
+      nodeScales: {},
     });
   },
 }));

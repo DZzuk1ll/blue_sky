@@ -6,12 +6,16 @@ import {
   formatPower,
   formatTemperature,
   getTemperatureColor,
+  getNodeDisplayLabel,
 } from '../../../utils/formatters';
 
 const CardNode: React.FC<NodeProps> = (props) => {
   const data = props.data as {
     label?: string;
     customIcon?: string;
+    displayAlias?: string;
+    customIconUrl?: string;
+    nodeType?: string;
     cardData: {
       power: number;
       temperature?: number;
@@ -25,11 +29,11 @@ const CardNode: React.FC<NodeProps> = (props) => {
       <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
-          <NodeIcon nodeType="card" customIcon={data.customIcon} />
+          <NodeIcon nodeType="card" customIcon={data.customIcon} customIconUrl={data.customIconUrl} />
         </div>
         <div className="node-info">
           <div className="node-header">
-            <span>{data.label ?? 'Card'}</span>
+            <span>{getNodeDisplayLabel(data as any)}</span>
           </div>
           <div className="node-body">
             <div>槽位: {card.slotId}</div>
