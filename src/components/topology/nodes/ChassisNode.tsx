@@ -1,5 +1,6 @@
 import React from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { type NodeProps } from '@xyflow/react';
+import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 
 const ChassisNode: React.FC<NodeProps> = (props) => {
@@ -17,7 +18,7 @@ const ChassisNode: React.FC<NodeProps> = (props) => {
           </div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} />
+      <MultiSideHandles />
     </div>
   );
 };

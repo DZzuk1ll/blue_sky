@@ -1,5 +1,6 @@
 import React from 'react';
 import { type NodeProps } from '@xyflow/react';
+import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 import {
   formatTemperature,
@@ -19,6 +20,7 @@ const SensorNode: React.FC<NodeProps> = (props) => {
 
   return (
     <div className="hardware-node sensor-node">
+      <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
           <NodeIcon nodeType="sensor" customIcon={data.customIcon} />

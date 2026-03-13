@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
+  ConnectionLineType,
   type OnSelectionChangeParams,
   type Connection,
   useReactFlow,
@@ -39,6 +40,15 @@ const DesignCanvasInner: React.FC = () => {
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
+
+  // Inject design mode into edge data so PowerEdge knows labels are editable
+  const designEdges = useMemo(
+    () => edges.map(e => ({
+      ...e,
+      data: { ...e.data!, _mode: 'design' as const },
+    })) as typeof edges,
+    [edges],
+  );
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -121,7 +131,7 @@ const DesignCanvasInner: React.FC = () => {
       <div ref={reactFlowWrapper} style={{ flex: 1, position: 'relative' }}>
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={designEdges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
@@ -134,6 +144,7 @@ const DesignCanvasInner: React.FC = () => {
           onNodeContextMenu={handleNodeContextMenu}
           fitView
           connectionLineStyle={{ stroke: '#1677ff', strokeWidth: 2 }}
+          connectionLineType={ConnectionLineType.SmoothStep}
           defaultEdgeOptions={{ type: 'powerEdge' }}
         >
           <Background />

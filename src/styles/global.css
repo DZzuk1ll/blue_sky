@@ -303,3 +303,52 @@ html, body, #root {
   color: #1677ff;
   background: #e6f4ff;
 }
+
+/* 多侧 Handle 样式 - 非默认 Handle 默认隐藏，hover 节点时显示 */
+.react-flow__handle[data-handleid] {
+  width: 6px;
+  height: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.hardware-node:hover .react-flow__handle[data-handleid] {
+  opacity: 1;
+}
+
+/* 可编辑 Label 输入框 */
+.edge-label-input {
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #1677ff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  outline: none;
+  min-width: 60px;
+  background: #fff;
+}
+
+/* 自定义 JSON 数据面板 */
+.edge-custom-data {
+  font-size: 10px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin-top: 2px;
+  max-width: 200px;
+  white-space: nowrap;
+}
+
+.edge-custom-data-row {
+  line-height: 1.6;
+}
+
+.edge-custom-data-key {
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.edge-custom-data-value {
+  color: #262626;
+}
