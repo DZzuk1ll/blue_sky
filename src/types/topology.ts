@@ -41,6 +41,9 @@ export interface PowerEdgeData {
   loss: number;         // 损耗 W
   lossPercent: number;  // 损耗百分比 %
   animated?: boolean;
+  label?: string;                        // 用户可编辑的标签文本
+  customData?: Record<string, unknown>;  // 自定义 JSON 数据（如 BMC 链路损耗信息）
+  _mode?: 'design' | 'monitor';         // 由 Canvas 注入的模式标识
   [key: string]: unknown;
 }
 

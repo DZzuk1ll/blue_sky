@@ -41,6 +41,7 @@ interface TopologyState {
   addEdge: (connection: Connection) => void;
   removeNode: (id: string) => void;
   removeEdge: (id: string) => void;
+  updateEdgeLabel: (edgeId: string, label: string | undefined) => void;
   updateNodeIcon: (nodeId: string, iconName: string) => void;
 
   // 重置
@@ -124,6 +125,8 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
       id,
       source: connection.source!,
       target: connection.target!,
+      sourceHandle: connection.sourceHandle ?? undefined,
+      targetHandle: connection.targetHandle ?? undefined,
       type: 'powerEdge',
       data: { loss: 0, lossPercent: 0, animated: true },
     };
@@ -141,6 +144,15 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
   removeEdge: (id) => {
     const { edges } = get();
     set({ edges: edges.filter(e => e.id !== id) });
+  },
+
+  updateEdgeLabel: (edgeId, label) => {
+    const { edges } = get();
+    set({
+      edges: edges.map(e =>
+        e.id === edgeId ? { ...e, data: { ...e.data!, label } } : e
+      ),
+    });
   },
 
   updateNodeIcon: (nodeId, iconName) => {

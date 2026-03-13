@@ -248,13 +248,13 @@ export function getDefaultEdges(): TopologyEdge[] {
     { id: 'e-psu1-vrcpu1', source: 'psu-1', target: 'vr-cpu1', type: 'powerEdge', data: { loss: 9.0, lossPercent: 1.3, animated: true } },
     { id: 'e-psu2-vrmem', source: 'psu-2', target: 'vr-mem', type: 'powerEdge', data: { loss: 3.0, lossPercent: 0.8, animated: true } },
     { id: 'e-psu1-psip', source: 'psu-1', target: 'psip-1', type: 'powerEdge', data: { loss: 1.5, lossPercent: 0.5, animated: true } },
-    // VR → CPU
-    { id: 'e-vrcpu0-cpu0', source: 'vr-cpu0', target: 'cpu-0', type: 'powerEdge', data: { loss: 5.2, lossPercent: 2.1, animated: true } },
-    { id: 'e-vrcpu1-cpu1', source: 'vr-cpu1', target: 'cpu-1', type: 'powerEdge', data: { loss: 5.5, lossPercent: 2.2, animated: true } },
+    // VR → CPU（含自定义 BMC 链路信息示例）
+    { id: 'e-vrcpu0-cpu0', source: 'vr-cpu0', target: 'cpu-0', type: 'powerEdge', data: { loss: 5.2, lossPercent: 2.1, animated: true, label: 'VR→CPU0', customData: { bmcLink: 'VR-CPU0 → CPU0', cableType: '12V DC', maxCurrent: '200A' } } },
+    { id: 'e-vrcpu1-cpu1', source: 'vr-cpu1', target: 'cpu-1', type: 'powerEdge', data: { loss: 5.5, lossPercent: 2.2, animated: true, label: 'VR→CPU1', customData: { bmcLink: 'VR-CPU1 → CPU1', cableType: '12V DC', maxCurrent: '180A' } } },
     // VR → 内存
     { id: 'e-vrmem-mem', source: 'vr-mem', target: 'mem-1', type: 'powerEdge', data: { loss: 1.2, lossPercent: 1.5, animated: true } },
-    // PSU → 风扇
-    { id: 'e-psu2-fan1', source: 'psu-2', target: 'fan-1', type: 'powerEdge', data: { loss: 0.5, lossPercent: 0.2, animated: true } },
+    // PSU → 风扇（fan1 使用非默认 handle 演示多侧连线）
+    { id: 'e-psu2-fan1', source: 'psu-2', sourceHandle: 'source-top', target: 'fan-1', targetHandle: 'target-bottom', type: 'powerEdge', data: { loss: 0.5, lossPercent: 0.2, animated: true } },
     { id: 'e-psu2-fan2', source: 'psu-2', target: 'fan-2', type: 'powerEdge', data: { loss: 0.5, lossPercent: 0.2, animated: true } },
     { id: 'e-psu2-fan3', source: 'psu-2', target: 'fan-3', type: 'powerEdge', data: { loss: 0.5, lossPercent: 0.2, animated: true } },
     { id: 'e-psu2-fan4', source: 'psu-2', target: 'fan-4', type: 'powerEdge', data: { loss: 0.5, lossPercent: 0.2, animated: true } },
@@ -308,14 +308,17 @@ export function refreshNodeData(nodes: TopologyNode[]): TopologyNode[] {
   });
 }
 
-/** 刷新边数据 */
+/** 刷新边数据（保留 label / customData 等用户字段） */
 export function refreshEdgeData(edges: TopologyEdge[]): TopologyEdge[] {
-  return edges.map(edge => ({
-    ...edge,
-    data: {
-      ...edge.data!,
-      loss: fluctuate(edge.data!.loss, 5),
-      lossPercent: fluctuate(edge.data!.lossPercent, 5),
-    } as PowerEdgeData,
-  }));
+  return edges.map(edge => {
+    const prev = edge.data!;
+    return {
+      ...edge,
+      data: {
+        ...prev,
+        loss: fluctuate(prev.loss, 5),
+        lossPercent: fluctuate(prev.lossPercent, 5),
+      } as PowerEdgeData,
+    };
+  });
 }

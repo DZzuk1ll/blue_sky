@@ -1,5 +1,6 @@
 import React from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { type NodeProps } from '@xyflow/react';
+import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 import {
   formatVoltage,
@@ -29,7 +30,7 @@ const PSUNode: React.FC<NodeProps> = (props) => {
 
   return (
     <div className="hardware-node source-node">
-      <Handle type="target" position={Position.Left} />
+      <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
           <NodeIcon nodeType="psu" customIcon={data.customIcon} />
@@ -72,7 +73,6 @@ const PSUNode: React.FC<NodeProps> = (props) => {
           </div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} />
     </div>
   );
 };

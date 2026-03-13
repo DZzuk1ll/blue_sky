@@ -1,5 +1,6 @@
 import React from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { type NodeProps } from '@xyflow/react';
+import MultiSideHandles from './MultiSideHandles';
 import NodeIcon from './NodeIcon';
 import {
   formatPower,
@@ -21,7 +22,7 @@ const IONode: React.FC<NodeProps> = (props) => {
 
   return (
     <div className="hardware-node load-node">
-      <Handle type="target" position={Position.Left} />
+      <MultiSideHandles />
       <div className="node-content">
         <div className="node-icon-area">
           <NodeIcon nodeType="io" customIcon={data.customIcon} />
