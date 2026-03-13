@@ -159,7 +159,7 @@ const TopologyOverviewPanel: React.FC<TopologyOverviewPanelProps> = ({ open, onT
             .join('<br/>'),
       },
       legend: { bottom: 0, textStyle: { fontSize: 11 } },
-      grid: { left: 50, right: 16, top: 35, bottom: 30 },
+      grid: { left: 50, right: 16, top: 40, bottom: 36 },
       xAxis: {
         type: 'category',
         data: history.map((h) => h.time),
@@ -419,25 +419,25 @@ const TopologyOverviewPanel: React.FC<TopologyOverviewPanelProps> = ({ open, onT
                   </span>
                 ),
                 children: (
-                  <div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                     <ReactECharts
                       option={totalPowerOption}
-                      style={{ height: 200, marginBottom: 8 }}
+                      style={{ height: 220 }}
                       notMerge
                     />
                     <ReactECharts
                       option={lossOption}
-                      style={{ height: 200, marginBottom: 8 }}
+                      style={{ height: 220 }}
                       notMerge
                     />
                     <ReactECharts
                       option={efficiencyOption}
-                      style={{ height: 200, marginBottom: 8 }}
+                      style={{ height: 220 }}
                       notMerge
                     />
                     <ReactECharts
                       option={temperatureOption}
-                      style={{ height: 200 }}
+                      style={{ height: 220 }}
                       notMerge
                     />
                   </div>

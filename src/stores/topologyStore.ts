@@ -19,6 +19,7 @@ interface TopologyState {
   edges: TopologyEdge[];
   selectedNodeIds: string[];
   clipboard: ClipboardItem[];
+  nodeScales: Record<string, number>;
 
   // 节点/边变更
   onNodesChange: (changes: NodeChange<TopologyNode>[]) => void;
@@ -35,6 +36,9 @@ interface TopologyState {
   copySelectedNodes: () => void;
   pasteNodes: () => void;
   deleteSelectedNodes: () => void;
+
+  // 节点缩放
+  setNodeScale: (nodeId: string, scale: number) => void;
 
   // 设计模式操作
   addNode: (type: HardwareNodeType, position: { x: number; y: number }) => void;
@@ -55,6 +59,7 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
   edges: getDefaultEdges(),
   selectedNodeIds: [],
   clipboard: [],
+  nodeScales: {},
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -91,6 +96,10 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
       };
     });
     set({ nodes: [...nodes, ...newNodes] });
+  },
+
+  setNodeScale: (nodeId, scale) => {
+    set({ nodeScales: { ...get().nodeScales, [nodeId]: scale } });
   },
 
   deleteSelectedNodes: () => {

@@ -304,6 +304,69 @@ html, body, #root {
   background: #e6f4ff;
 }
 
+/* === 节点缩放控制按钮 === */
+.scalable-node-wrapper {
+  position: relative;
+}
+
+.node-scale-controls {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  padding: 2px;
+  pointer-events: auto;
+}
+
+.scalable-node-wrapper:hover .node-scale-controls {
+  opacity: 1;
+}
+
+.scale-btn {
+  width: 24px;
+  height: 22px;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #595959;
+  padding: 0;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.scale-btn:hover {
+  border-color: #1677ff;
+  color: #1677ff;
+  background: #e6f4ff;
+}
+
+.scale-btn-reset {
+  width: auto;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #8c8c8c;
+}
+
+/* === 连线高亮 - 选中节点的关联节点高亮 === */
+.node-highlighted .hardware-node {
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.3), 0 0 16px rgba(22, 119, 255, 0.15);
+  border-color: #1677ff !important;
+}
+
 /* 多侧 Handle 样式 - 非默认 Handle 默认隐藏，hover 节点时显示 */
 .react-flow__handle[data-handleid] {
   width: 6px;
