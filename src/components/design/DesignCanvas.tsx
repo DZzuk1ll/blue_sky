@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -26,9 +26,12 @@ const DesignCanvasInner: React.FC = () => {
   const {
     nodes,
     edges,
+    selectedNodeIds,
     onNodesChange,
     onEdgesChange,
     setSelectedNodeIds,
+    copySelectedNodes,
+    pasteNodes,
     deleteSelectedNodes,
     addNode,
     addEdge,
@@ -41,13 +44,56 @@ const DesignCanvasInner: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
 
-  // Inject design mode into edge data so PowerEdge knows labels are editable
+  // === 连线高亮 ===
+  const highlightedEdgeIds = useMemo(() => {
+    if (selectedNodeIds.length === 0) return new Set<string>();
+    return new Set(
+      edges
+        .filter(
+          (e) =>
+            selectedNodeIds.includes(e.source) ||
+            selectedNodeIds.includes(e.target),
+        )
+        .map((e) => e.id),
+    );
+  }, [edges, selectedNodeIds]);
+
+  const highlightedNodeIds = useMemo(() => {
+    if (selectedNodeIds.length === 0) return new Set<string>();
+    const ids = new Set<string>();
+    edges.forEach((e) => {
+      if (selectedNodeIds.includes(e.source)) ids.add(e.target);
+      if (selectedNodeIds.includes(e.target)) ids.add(e.source);
+    });
+    selectedNodeIds.forEach((id) => ids.add(id));
+    return ids;
+  }, [edges, selectedNodeIds]);
+
+  // 注入 design mode + 高亮标记到 edge data
   const designEdges = useMemo(
-    () => edges.map(e => ({
-      ...e,
-      data: { ...e.data!, _mode: 'design' as const },
-    })) as typeof edges,
-    [edges],
+    () =>
+      edges.map((e) => ({
+        ...e,
+        data: {
+          ...e.data!,
+          _mode: 'design' as const,
+          _highlighted: highlightedEdgeIds.has(e.id),
+        },
+      })) as typeof edges,
+    [edges, highlightedEdgeIds],
+  );
+
+  // 注入高亮标记到节点 data
+  const processedNodes = useMemo(
+    () =>
+      nodes.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          _highlighted: highlightedNodeIds.has(n.id),
+        },
+      })),
+    [nodes, highlightedNodeIds],
   );
 
   const [contextMenu, setContextMenu] = useState<{
@@ -125,12 +171,32 @@ const DesignCanvasInner: React.FC = () => {
     [contextMenu, updateNodeIcon],
   );
 
+  // Keyboard shortcuts: Ctrl+C, Ctrl+V, Delete
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        deleteSelectedNodes();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        e.preventDefault();
+        copySelectedNodes();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        e.preventDefault();
+        pasteNodes();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [copySelectedNodes, pasteNodes, deleteSelectedNodes]);
+
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex' }}>
       <ModulePalette />
       <div ref={reactFlowWrapper} style={{ flex: 1, position: 'relative' }}>
         <ReactFlow
-          nodes={nodes}
+          nodes={processedNodes}
           edges={designEdges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -24,6 +24,7 @@ const TopologyCanvas: React.FC = () => {
   const {
     nodes,
     edges,
+    selectedNodeIds,
     onNodesChange,
     onEdgesChange,
     setSelectedNodeIds,
@@ -42,6 +43,57 @@ const TopologyCanvas: React.FC = () => {
   // Track drag state to prevent detail panel opening during drag
   const isDragging = useRef(false);
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+
+  // === 连线高亮：选中节点时高亮相关边和连接的节点 ===
+  const highlightedEdgeIds = useMemo(() => {
+    if (selectedNodeIds.length === 0) return new Set<string>();
+    return new Set(
+      edges
+        .filter(
+          (e) =>
+            selectedNodeIds.includes(e.source) ||
+            selectedNodeIds.includes(e.target),
+        )
+        .map((e) => e.id),
+    );
+  }, [edges, selectedNodeIds]);
+
+  const highlightedNodeIds = useMemo(() => {
+    if (selectedNodeIds.length === 0) return new Set<string>();
+    const ids = new Set<string>();
+    edges.forEach((e) => {
+      if (selectedNodeIds.includes(e.source)) ids.add(e.target);
+      if (selectedNodeIds.includes(e.target)) ids.add(e.source);
+    });
+    selectedNodeIds.forEach((id) => ids.add(id));
+    return ids;
+  }, [edges, selectedNodeIds]);
+
+  // 注入高亮标记到节点 data
+  const processedNodes = useMemo(
+    () =>
+      nodes.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          _highlighted: highlightedNodeIds.has(n.id),
+        },
+      })),
+    [nodes, highlightedNodeIds],
+  );
+
+  // 注入高亮标记到边 data
+  const processedEdges = useMemo(
+    () =>
+      edges.map((e) => ({
+        ...e,
+        data: {
+          ...e.data!,
+          _highlighted: highlightedEdgeIds.has(e.id),
+        },
+      })),
+    [edges, highlightedEdgeIds],
+  );
 
   const handleSelectionChange = useCallback(
     (params: OnSelectionChangeParams) => {
@@ -97,10 +149,10 @@ const TopologyCanvas: React.FC = () => {
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         deleteSelectedNodes();
-      } else if (e.ctrlKey && e.key === 'c') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         e.preventDefault();
         copySelectedNodes();
-      } else if (e.ctrlKey && e.key === 'v') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         e.preventDefault();
         pasteNodes();
       }
@@ -112,8 +164,8 @@ const TopologyCanvas: React.FC = () => {
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: '#fff' }}>
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={processedNodes}
+        edges={processedEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
@@ -123,6 +175,7 @@ const TopologyCanvas: React.FC = () => {
         onNodeDragStart={handleNodeDragStart}
         onNodeDrag={handleNodeDrag}
         onPaneClick={handlePaneClick}
+        nodesDraggable={false}
         fitView
       >
         <Controls />

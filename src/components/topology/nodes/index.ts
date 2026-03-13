@@ -1,4 +1,5 @@
 import type { NodeTypes } from '@xyflow/react';
+import { withScalable } from './ScalableNodeWrapper';
 import ACNode from './ACNode';
 import PSUNode from './PSUNode';
 import VRNode from './VRNode';
@@ -14,17 +15,17 @@ import MgmtBoardNode from './MgmtBoardNode';
 import ChassisNode from './ChassisNode';
 
 export const nodeTypes: NodeTypes = {
-  ac: ACNode,
-  psu: PSUNode,
-  vr: VRNode,
-  psip: PSIPNode,
-  cpu: CPUNode,
-  memory: MemoryNode,
-  fan: FanNode,
-  disk: DiskNode,
-  io: IONode,
-  card: CardNode,
-  sensor: SensorNode,
-  mgmtBoard: MgmtBoardNode,
-  chassis: ChassisNode,
+  ac: withScalable(ACNode),
+  psu: withScalable(PSUNode),
+  vr: withScalable(VRNode),
+  psip: withScalable(PSIPNode),
+  cpu: withScalable(CPUNode),
+  memory: withScalable(MemoryNode),
+  fan: withScalable(FanNode),
+  disk: withScalable(DiskNode),
+  io: withScalable(IONode),
+  card: withScalable(CardNode),
+  sensor: withScalable(SensorNode),
+  mgmtBoard: withScalable(MgmtBoardNode),
+  chassis: withScalable(ChassisNode),
 };

@@ -9,6 +9,7 @@ interface PowerEdgeData {
   label?: string;
   customData?: Record<string, unknown>;
   _mode?: 'design' | 'monitor';
+  _highlighted?: boolean;
   [key: string]: unknown;
 }
 
@@ -38,6 +39,7 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
   const edgeLabel = data?.label;
   const customData = data?.customData;
   const isDesignMode = data?._mode === 'design';
+  const isHighlighted = data?._highlighted === true;
 
   const updateEdgeLabel = useTopologyStore((s) => s.updateEdgeLabel);
 
@@ -106,13 +108,24 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
         stroke="transparent"
         strokeWidth={12}
       />
+      {/* Highlighted glow (behind the main path) */}
+      {isHighlighted && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={8}
+          strokeOpacity={0.25}
+          style={{ filter: 'blur(2px)' }}
+        />
+      )}
       {/* Visible edge path */}
       <path
         id={id}
         d={edgePath}
         fill="none"
         stroke={color}
-        strokeWidth={2}
+        strokeWidth={isHighlighted ? 3 : 2}
         markerEnd={markerEnd}
         style={style}
       />
