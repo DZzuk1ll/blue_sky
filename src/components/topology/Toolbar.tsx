@@ -6,7 +6,6 @@ import {
   ExpandOutlined,
   CopyOutlined,
   ScissorOutlined,
-  DeleteOutlined,
   ReloadOutlined,
   DownloadOutlined,
   UploadOutlined,
@@ -17,11 +16,10 @@ import { useTopologyStore } from '../../stores/topologyStore';
 interface ToolbarProps {
   onCopy: () => void;
   onPaste: () => void;
-  onDelete: () => void;
   onReset: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ onCopy, onPaste, onDelete, onReset }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ onCopy, onPaste, onReset }) => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { exportTopology, importTopology } = useTopologyStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,7 +67,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCopy, onPaste, onDelete, onReset })
     { title: '适应画布', icon: <ExpandOutlined />, onClick: () => fitView() },
     { title: '复制 (Ctrl+C)', icon: <CopyOutlined />, onClick: onCopy },
     { title: '粘贴 (Ctrl+V)', icon: <ScissorOutlined />, onClick: onPaste },
-    { title: '删除 (Del)', icon: <DeleteOutlined />, onClick: onDelete },
     { title: '导出拓扑', icon: <DownloadOutlined />, onClick: handleExport },
     { title: '导入拓扑', icon: <UploadOutlined />, onClick: handleImport },
     { title: '重置', icon: <ReloadOutlined />, onClick: onReset },
