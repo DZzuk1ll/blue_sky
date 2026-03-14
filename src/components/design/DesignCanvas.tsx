@@ -19,7 +19,6 @@ import ModulePalette from './ModulePalette';
 import IconPicker from './IconPicker';
 import NodeEditPanel from './NodeEditPanel';
 import { useTopologyStore } from '../../stores/topologyStore';
-import { saveVersion } from '../../services/topologyPersistence';
 import type { HardwareNodeType, TopologyNode } from '../../types/topology';
 
 const edgeTypes = { powerEdge: PowerEdge };
@@ -41,6 +40,7 @@ const DesignCanvasInner: React.FC = () => {
     resetToDefault,
     updateNodes,
     updateEdges,
+    setDesignMode,
   } = useTopologyStore();
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -189,15 +189,11 @@ const DesignCanvasInner: React.FC = () => {
     [contextMenu, updateNodeIcon],
   );
 
-  // 自动版本快照：每 5 分钟保存一次版本
-  const autoVersionRef = useRef<ReturnType<typeof setInterval>>();
+  // 进入/退出设计模式时设置标记，自动保存逻辑依赖此标记
   useEffect(() => {
-    autoVersionRef.current = setInterval(() => {
-      const data = useTopologyStore.getState().exportTopology();
-      saveVersion(data, '自动保存');
-    }, 5 * 60 * 1000);
-    return () => clearInterval(autoVersionRef.current);
-  }, []);
+    setDesignMode(true);
+    return () => setDesignMode(false);
+  }, [setDesignMode]);
 
   // Keyboard shortcuts: Ctrl+C, Ctrl+V, Delete
   useEffect(() => {
