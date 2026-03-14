@@ -13,7 +13,9 @@ import {
   saveCurrentTopology,
   loadCurrentTopology,
   saveVersion,
+  saveAutoVersion,
   loadVersions,
+  updateVersionMeta as updateVersionMetaInStorage,
   deleteVersion as deleteVersionFromStorage,
   clearVersions as clearVersionsFromStorage,
 } from '../services/topologyPersistence';
@@ -29,6 +31,10 @@ interface TopologyState {
   selectedNodeIds: string[];
   clipboard: ClipboardItem[];
   nodeScales: Record<string, number>;
+  isDesignMode: boolean;
+
+  // 设计模式标记
+  setDesignMode: (active: boolean) => void;
 
   // 节点/边变更
   onNodesChange: (changes: NodeChange<TopologyNode>[]) => void;
@@ -76,6 +82,7 @@ interface TopologyState {
   saveManual: (label?: string) => void;
   getVersions: () => TopologyVersion[];
   rollbackToVersion: (versionId: string) => boolean;
+  updateVersionMeta: (versionId: string, label: string, notes?: string) => boolean;
   deleteVersion: (versionId: string) => void;
   clearVersionHistory: () => void;
 
@@ -110,6 +117,9 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
   selectedNodeIds: [],
   clipboard: [],
   nodeScales: initialState.nodeScales,
+  isDesignMode: false,
+
+  setDesignMode: (active) => set({ isDesignMode: active }),
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -346,6 +356,10 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
     return success;
   },
 
+  updateVersionMeta: (versionId, label, notes) => {
+    return updateVersionMetaInStorage(versionId, label, notes);
+  },
+
   deleteVersion: (versionId) => {
     deleteVersionFromStorage(versionId);
   },
@@ -365,10 +379,13 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
   },
 }));
 
-// === 自动保存：监听 store 变化，防抖写入 localStorage ===
+// === 自动保存：仅在设计模式下，监听 store 变化，防抖写入 localStorage ===
 let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
 useTopologyStore.subscribe((state, prevState) => {
+  // 只在设计模式下触发
+  if (!state.isDesignMode) return;
+
   // 只在节点、边或缩放比例变化时触发保存
   if (
     state.nodes === prevState.nodes &&
@@ -381,6 +398,9 @@ useTopologyStore.subscribe((state, prevState) => {
   if (autoSaveTimer) clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(() => {
     const data = useTopologyStore.getState().exportTopology();
+    // 保存当前状态到 localStorage
     saveCurrentTopology(data);
+    // 覆盖最新的自动保存版本记录（不会不停新增）
+    saveAutoVersion(data);
   }, 1000); // 1秒防抖
 });
