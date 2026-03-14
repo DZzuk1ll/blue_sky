@@ -52,11 +52,15 @@ export type HardwareNodeData = {
 /** React Flow节点类型 */
 export type TopologyNode = Node<HardwareNodeData>;
 
+/** 连线箭头类型 */
+export type EdgeArrowType = 'none' | 'forward' | 'both';
+
 /** 边数据 */
 export interface PowerEdgeData {
   loss: number;         // 损耗 W
   lossPercent: number;  // 损耗百分比 %
   animated?: boolean;
+  arrowType?: EdgeArrowType;             // 箭头类型：无箭头 / 单向 / 双向
   label?: string;                        // 用户可编辑的标签文本
   customData?: Record<string, unknown>;  // 自定义 JSON 数据（如 BMC 链路损耗信息）
   _mode?: 'design' | 'monitor';         // 由 Canvas 注入的模式标识

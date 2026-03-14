@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { type EdgeProps, getSmoothStepPath, EdgeLabelRenderer } from '@xyflow/react';
 import { useTopologyStore } from '../../../stores/topologyStore';
+import type { EdgeArrowType } from '../../../types/topology';
 
-interface PowerEdgeData {
+interface PowerEdgeDataLocal {
   loss: number;
   lossPercent: number;
   animated?: boolean;
+  arrowType?: EdgeArrowType;
   label?: string;
   customData?: Record<string, unknown>;
   _mode?: 'design' | 'monitor';
@@ -19,6 +21,16 @@ function getEdgeColor(lossPercent: number): string {
   return '#f5222d';
 }
 
+/** 箭头类型对应的显示文字 */
+const arrowLabels: Record<EdgeArrowType, string> = {
+  none: '无箭头',
+  forward: '单向 →',
+  both: '双向 ⇆',
+};
+
+/** 箭头类型循环顺序 */
+const arrowCycle: EdgeArrowType[] = ['forward', 'both', 'none'];
+
 const PowerEdge: React.FC<EdgeProps> = (props) => {
   const {
     id,
@@ -29,19 +41,20 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
     sourcePosition,
     targetPosition,
     style = {},
-    markerEnd,
   } = props;
 
-  const data = props.data as PowerEdgeData | undefined;
+  const data = props.data as PowerEdgeDataLocal | undefined;
   const loss = data?.loss ?? 0;
   const lossPercent = data?.lossPercent ?? 0;
   const animated = data?.animated !== false;
+  const arrowType: EdgeArrowType = data?.arrowType ?? 'forward';
   const edgeLabel = data?.label;
   const customData = data?.customData;
   const isDesignMode = data?._mode === 'design';
   const isHighlighted = data?._highlighted === true;
 
   const updateEdgeLabel = useTopologyStore((s) => s.updateEdgeLabel);
+  const updateEdgeArrowType = useTopologyStore((s) => s.updateEdgeArrowType);
 
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(edgeLabel ?? '');
@@ -54,7 +67,6 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
     }
   }, [editing]);
 
-  // Sync editValue when external label changes
   useEffect(() => {
     if (!editing) {
       setEditValue(edgeLabel ?? '');
@@ -73,6 +85,10 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
   });
 
   const color = getEdgeColor(lossPercent);
+
+  // 为每条边生成唯一的 marker ID
+  const markerEndId = `arrow-end-${id}`;
+  const markerStartId = `arrow-start-${id}`;
 
   const handleLabelClick = useCallback(() => {
     if (isDesignMode) {
@@ -98,8 +114,44 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
     [commitLabel, edgeLabel],
   );
 
+  const handleCycleArrow = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const currentIdx = arrowCycle.indexOf(arrowType);
+      const next = arrowCycle[(currentIdx + 1) % arrowCycle.length];
+      updateEdgeArrowType(id, next);
+    },
+    [id, arrowType, updateEdgeArrowType],
+  );
+
   return (
     <>
+      {/* SVG marker definitions for arrows */}
+      <defs>
+        <marker
+          id={markerEndId}
+          viewBox="0 0 10 10"
+          refX="8"
+          refY="5"
+          markerWidth="8"
+          markerHeight="8"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
+        </marker>
+        <marker
+          id={markerStartId}
+          viewBox="0 0 10 10"
+          refX="2"
+          refY="5"
+          markerWidth="8"
+          markerHeight="8"
+          orient="auto-start-reverse"
+        >
+          <path d="M 10 0 L 0 5 L 10 10 z" fill={color} />
+        </marker>
+      </defs>
+
       {/* Background path for wider hit area */}
       <path
         id={`${id}-bg`}
@@ -108,7 +160,7 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
         stroke="transparent"
         strokeWidth={12}
       />
-      {/* Highlighted glow (behind the main path) */}
+      {/* Highlighted glow */}
       {isHighlighted && (
         <path
           d={edgePath}
@@ -119,14 +171,15 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
           style={{ filter: 'blur(2px)' }}
         />
       )}
-      {/* Visible edge path */}
+      {/* Visible edge path with arrow markers */}
       <path
         id={id}
         d={edgePath}
         fill="none"
         stroke={color}
         strokeWidth={isHighlighted ? 3 : 2}
-        markerEnd={markerEnd}
+        markerEnd={arrowType !== 'none' ? `url(#${markerEndId})` : undefined}
+        markerStart={arrowType === 'both' ? `url(#${markerStartId})` : undefined}
         style={style}
       />
       {/* Animated flowing overlay */}
@@ -142,7 +195,6 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
           }}
         />
       )}
-      {/* Inline keyframes (rendered once, deduped by browser) */}
       <style>
         {`@keyframes power-edge-flow {
           to { stroke-dashoffset: -10; }
@@ -191,6 +243,28 @@ const PowerEdge: React.FC<EdgeProps> = (props) => {
               </>
             )}
           </div>
+
+          {/* Arrow type toggle button - design mode only */}
+          {isDesignMode && (
+            <div
+              style={{
+                marginTop: 2,
+                fontSize: 10,
+                background: '#f0f5ff',
+                border: '1px solid #adc6ff',
+                borderRadius: 3,
+                padding: '1px 4px',
+                cursor: 'pointer',
+                textAlign: 'center',
+                color: '#1677ff',
+                userSelect: 'none',
+              }}
+              onClick={handleCycleArrow}
+              title="点击切换箭头类型"
+            >
+              {arrowLabels[arrowType]}
+            </div>
+          )}
 
           {/* Custom JSON data display */}
           {customData && Object.keys(customData).length > 0 && (
