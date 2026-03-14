@@ -19,6 +19,7 @@ import ModulePalette from './ModulePalette';
 import IconPicker from './IconPicker';
 import NodeEditPanel from './NodeEditPanel';
 import { useTopologyStore } from '../../stores/topologyStore';
+import { saveVersion } from '../../services/topologyPersistence';
 import type { HardwareNodeType, TopologyNode } from '../../types/topology';
 
 const edgeTypes = { powerEdge: PowerEdge };
@@ -187,6 +188,16 @@ const DesignCanvasInner: React.FC = () => {
     },
     [contextMenu, updateNodeIcon],
   );
+
+  // 自动版本快照：每 5 分钟保存一次版本
+  const autoVersionRef = useRef<ReturnType<typeof setInterval>>();
+  useEffect(() => {
+    autoVersionRef.current = setInterval(() => {
+      const data = useTopologyStore.getState().exportTopology();
+      saveVersion(data, '自动保存');
+    }, 5 * 60 * 1000);
+    return () => clearInterval(autoVersionRef.current);
+  }, []);
 
   // Keyboard shortcuts: Ctrl+C, Ctrl+V, Delete
   useEffect(() => {

@@ -7,8 +7,17 @@ import {
   type EdgeChange,
   type Connection,
 } from '@xyflow/react';
-import type { TopologyNode, TopologyEdge, HardwareNodeType, ApiConfig, TopologyExportData } from '../types/topology';
+import type { TopologyNode, TopologyEdge, HardwareNodeType, ApiConfig, TopologyExportData, EdgeArrowType } from '../types/topology';
 import { getDefaultNodes, getDefaultEdges, createDefaultNodeData } from '../services/mockData';
+import {
+  saveCurrentTopology,
+  loadCurrentTopology,
+  saveVersion,
+  loadVersions,
+  deleteVersion as deleteVersionFromStorage,
+  clearVersions as clearVersionsFromStorage,
+} from '../services/topologyPersistence';
+import type { TopologyVersion } from '../services/topologyPersistence';
 
 interface ClipboardItem {
   node: TopologyNode;
@@ -46,6 +55,7 @@ interface TopologyState {
   removeNode: (id: string) => void;
   removeEdge: (id: string) => void;
   updateEdgeLabel: (edgeId: string, label: string | undefined) => void;
+  updateEdgeArrowType: (edgeId: string, arrowType: EdgeArrowType) => void;
   updateNodeIcon: (nodeId: string, iconName: string) => void;
 
   // 别名 & 自定义图标 & API配置
@@ -62,18 +72,44 @@ interface TopologyState {
   exportTopology: () => TopologyExportData;
   importTopology: (data: TopologyExportData) => boolean;
 
+  // 持久化 & 版本管理
+  saveManual: (label?: string) => void;
+  getVersions: () => TopologyVersion[];
+  rollbackToVersion: (versionId: string) => boolean;
+  deleteVersion: (versionId: string) => void;
+  clearVersionHistory: () => void;
+
   // 重置
   resetToDefault: () => void;
 }
 
 let nodeCounter = 0;
 
+/** 尝试从 localStorage 加载已保存的拓扑 */
+function getInitialState() {
+  const saved = loadCurrentTopology();
+  if (saved) {
+    return {
+      nodes: saved.nodes,
+      edges: saved.edges,
+      nodeScales: saved.nodeScales || {},
+    };
+  }
+  return {
+    nodes: getDefaultNodes(),
+    edges: getDefaultEdges(),
+    nodeScales: {} as Record<string, number>,
+  };
+}
+
+const initialState = getInitialState();
+
 export const useTopologyStore = create<TopologyState>((set, get) => ({
-  nodes: getDefaultNodes(),
-  edges: getDefaultEdges(),
+  nodes: initialState.nodes,
+  edges: initialState.edges,
   selectedNodeIds: [],
   clipboard: [],
-  nodeScales: {},
+  nodeScales: initialState.nodeScales,
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) });
@@ -174,6 +210,15 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
     set({
       edges: edges.map(e =>
         e.id === edgeId ? { ...e, data: { ...e.data!, label } } : e
+      ),
+    });
+  },
+
+  updateEdgeArrowType: (edgeId, arrowType) => {
+    const { edges } = get();
+    set({
+      edges: edges.map(e =>
+        e.id === edgeId ? { ...e, data: { ...e.data!, arrowType } } : e
       ),
     });
   },
@@ -280,6 +325,35 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
     return true;
   },
 
+  saveManual: (label?: string) => {
+    const data = get().exportTopology();
+    saveCurrentTopology(data);
+    saveVersion(data, label || '手动保存');
+  },
+
+  getVersions: () => {
+    return loadVersions();
+  },
+
+  rollbackToVersion: (versionId) => {
+    const versions = loadVersions();
+    const version = versions.find(v => v.id === versionId);
+    if (!version) return false;
+    const success = get().importTopology(version.data);
+    if (success) {
+      saveCurrentTopology(version.data);
+    }
+    return success;
+  },
+
+  deleteVersion: (versionId) => {
+    deleteVersionFromStorage(versionId);
+  },
+
+  clearVersionHistory: () => {
+    clearVersionsFromStorage();
+  },
+
   resetToDefault: () => {
     set({
       nodes: getDefaultNodes(),
@@ -290,3 +364,23 @@ export const useTopologyStore = create<TopologyState>((set, get) => ({
     });
   },
 }));
+
+// === 自动保存：监听 store 变化，防抖写入 localStorage ===
+let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+
+useTopologyStore.subscribe((state, prevState) => {
+  // 只在节点、边或缩放比例变化时触发保存
+  if (
+    state.nodes === prevState.nodes &&
+    state.edges === prevState.edges &&
+    state.nodeScales === prevState.nodeScales
+  ) {
+    return;
+  }
+
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const data = useTopologyStore.getState().exportTopology();
+    saveCurrentTopology(data);
+  }, 1000); // 1秒防抖
+});
